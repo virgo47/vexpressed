@@ -97,7 +97,7 @@ public class DelegateFunctionExecutor
 		Object[] args = prepareArguments(params, methodInfo);
 		try {
 			return methodInfo.method.invoke(methodInfo.object, args);
-		} catch (IllegalAccessException | InvocationTargetException e) {
+		} catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
 			String reason = e.getCause() != null
 				? e.getCause().getMessage()
 				: e.getMessage();
