@@ -22,3 +22,8 @@ Missing but considered for future versions:
 
 
 ## Examples
+
+## TODO
+
+* ExpressionValidatorVisitor should return not just ExpressionType, but our type + real Java type
+(this allows to do better checking for comparison operator for instance)
