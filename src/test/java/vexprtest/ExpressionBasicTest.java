@@ -209,8 +209,7 @@ public class ExpressionBasicTest {
 		// next case colides with custom operators
 		assertThatThrownBy(() -> expr("--5)"))
 			.isInstanceOf(ExpressionException.class)
-			.hasMessageStartingWith(
-				"Expression parse failed at 1:0 - no viable alternative at input '--'");
+			.hasMessageMatching("(?s)Expression parse failed at 1:0.*'--'.*");
 		assertThatThrownBy(() -> expr("-'nono'"))
 			.isInstanceOf(ExpressionException.class);
 	}
