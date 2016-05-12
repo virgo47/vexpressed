@@ -161,6 +161,16 @@ public class ExpressionValidatorTest {
 	}
 
 	@Test
+	public void invalidComparisons() {
+		assertThatThrownBy(() -> expr("5 > ''"))
+			.isInstanceOf(ExpressionException.class)
+			.hasMessage("Invalid comparison/relation operation between type INTEGER and STRING");
+		assertThatThrownBy(() -> expr("1 < true"))
+			.isInstanceOf(ExpressionException.class)
+		.hasMessage("Invalid comparison/relation operation between type INTEGER and BOOLEAN");
+	}
+
+	@Test
 	public void unarySign() {
 		assertEquals(expr("--5"), INTEGER);
 		assertThatThrownBy(() -> expr("-'nono'"))

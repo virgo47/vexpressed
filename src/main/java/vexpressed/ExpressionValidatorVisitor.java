@@ -112,9 +112,21 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 
 	@Override
 	public ExpressionType visitComparisonOp(ComparisonOpContext ctx) {
+		ExpressionType left = visit(ctx.expr(0));
+		ExpressionType right = visit(ctx.expr(1));
+
+		if ((left == DECIMAL || left == INTEGER) && (right == DECIMAL || right == INTEGER)) {
+			return BOOLEAN;
+		}
+
 		// Does not cover all the corner cases - this would require more than ExpressionType,
 		// we need actual Java type too to find out whether it's comparable.
-		return BOOLEAN;
+		if (left == null || right == null || left == right) {
+			return BOOLEAN;
+		}
+
+		throw new ExpressionException(
+			"Invalid comparison/relation operation between type " + left + " and " + right);
 	}
 
 	@Override
