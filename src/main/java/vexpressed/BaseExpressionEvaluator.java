@@ -41,12 +41,12 @@ public class BaseExpressionEvaluator {
 		this(DEFAULT_CACHE_CAPACITY);
 	}
 
-	protected BaseExpressionEvaluator addFunctionsFrom(Object functionsDelegate) {
+	public BaseExpressionEvaluator addFunctionsFrom(Object functionsDelegate) {
 		functionExecutor.scanForFunctions(functionsDelegate);
 		return this;
 	}
 
-	protected BaseExpressionEvaluator addFunction(
+	public BaseExpressionEvaluator addFunction(
 		String functionName, Object delegate, String methodName, Class<?>... parameterTypes)
 	{
 		functionExecutor.registerFunction(
