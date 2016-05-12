@@ -205,7 +205,12 @@ public class ExpressionBasicTest {
 
 	@Test
 	public void unarySign() {
-		assertEquals(expr("--5"), 5);
+		assertEquals(expr("-(-5)"), 5);
+		// next case colides with custom operators
+		assertThatThrownBy(() -> expr("--5)"))
+			.isInstanceOf(ExpressionException.class)
+			.hasMessageStartingWith(
+				"Expression parse failed at 1:0 - no viable alternative at input '--'");
 		assertThatThrownBy(() -> expr("-'nono'"))
 			.isInstanceOf(ExpressionException.class);
 	}

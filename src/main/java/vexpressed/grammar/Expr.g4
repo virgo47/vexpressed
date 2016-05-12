@@ -34,6 +34,7 @@ expr: STRING_LITERAL # stringLiteral
 	| expr op=(OP_AND | OP_OR) expr # logicOp
 	| ID '(' params=paramlist? ')' # function
 	| expr ID expr # infixFunction
+	| expr CUSTOM_OP expr # customOp
 	| ID # variable
 	| '(' expr ')' # parens
 	;
@@ -64,6 +65,7 @@ BOOLEAN_LITERAL: T R U E | T
 	| F A L S E | F
 	;
 
+// dot is allowed only because syntax does not directly support attribute paths/method calls (yet)
 ID: [a-zA-Z$_][a-zA-Z0-9$_.]*;
 
 NUMERIC_LITERAL : DIGIT+ ( '.' DIGIT* )? ( E [-+]? DIGIT+ )?
@@ -77,6 +79,9 @@ SPACES : [ \u000B\t\r\n] -> channel(HIDDEN) ;
 COMMENT : '/*' .*? '*/' -> skip ;
 
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
+
+// after line comment and comment and similar things not to overshadow them
+CUSTOM_OP: [#+*/<>=!|.;:?~_@$%^&-]+;
 
 UNEXPECTED_CHAR : . ;
 

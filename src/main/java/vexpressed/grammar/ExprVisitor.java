@@ -1,4 +1,4 @@
-// Generated from C:/work/workspace/vexpressed/src/main/java/vexpressed/grammar\Expr.g4 by ANTLR 4.5.1
+// Generated from C:/work/vexpressed/src/main/java/vexpressed/grammar\Expr.g4 by ANTLR 4.5.1
 package vexpressed.grammar;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -51,6 +51,13 @@ public interface ExprVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitUnarySign(ExprParser.UnarySignContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code customOp}
+	 * labeled alternative in {@link ExprParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCustomOp(ExprParser.CustomOpContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code stringLiteral}
 	 * labeled alternative in {@link ExprParser#expr}.

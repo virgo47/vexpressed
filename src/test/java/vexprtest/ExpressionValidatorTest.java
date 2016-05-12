@@ -172,7 +172,7 @@ public class ExpressionValidatorTest {
 
 	@Test
 	public void unarySign() {
-		assertEquals(expr("--5"), INTEGER);
+		assertEquals(expr("-(-5)"), INTEGER);
 		assertThatThrownBy(() -> expr("-'nono'"))
 			.isInstanceOf(ExpressionException.class);
 	}

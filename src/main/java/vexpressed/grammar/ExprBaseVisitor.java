@@ -1,4 +1,4 @@
-// Generated from C:/work/workspace/vexpressed/src/main/java/vexpressed/grammar\Expr.g4 by ANTLR 4.5.1
+// Generated from C:/work/vexpressed/src/main/java/vexpressed/grammar\Expr.g4 by ANTLR 4.5.1
 package vexpressed.grammar;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
@@ -53,6 +53,13 @@ public class ExprBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements E
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitUnarySign(ExprParser.UnarySignContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitCustomOp(ExprParser.CustomOpContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
