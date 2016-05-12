@@ -13,6 +13,9 @@ public @interface ExpressionFunction {
 	/** Name of the function - if empty, method name is used. */
 	String value() default "";
 
-	/** Array of parameter names in the order of method parameters. */
+	/**
+	 * Array of parameter names in the order of method parameters.
+	 * If used, all parameters must be listed.
+	 */
 	String[] paramNames() default {};
 }

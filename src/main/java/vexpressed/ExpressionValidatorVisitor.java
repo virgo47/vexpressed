@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import vexpressed.func.ExpressionFunctionTypeResolver;
-import vexpressed.func.FunctionArgument;
+import vexpressed.func.FunctionParameterDefinition;
 import vexpressed.grammar.ExprBaseVisitor;
 import vexpressed.grammar.ExprParser;
 import vexpressed.vars.ExpressionVariableTypeResolver;
@@ -179,15 +179,15 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 	@Override
 	public ExpressionType visitFunction(ExprParser.FunctionContext ctx) {
 		String functionName = ctx.ID().getText();
-		List<FunctionArgument> params = ctx.paramlist() != null
+		List<FunctionParameterDefinition> args = ctx.paramlist() != null
 			? ctx.paramlist().funarg().stream()
-			.map(funArgCtx -> new FunctionArgument(
+			.map(funArgCtx -> new FunctionParameterDefinition(
 				funArgCtx.ID() != null ? funArgCtx.ID().getText() : null,
 				visitFunarg(funArgCtx)))
 			.collect(Collectors.toList())
 			: Collections.emptyList();
 
-		return resolveFunctionType(functionName, params);
+		return resolveFunctionType(functionName, args);
 	}
 
 	@Override
@@ -195,23 +195,24 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 		return visit(ctx.expr());
 	}
 
-	@Override public ExpressionType visitInfixFunction(ExprParser.InfixFunctionContext ctx) {
+	@Override
+	public ExpressionType visitInfixFunction(ExprParser.InfixFunctionContext ctx) {
 		String functionName = ctx.ID().getText();
-		List<FunctionArgument> args = new ArrayList<>();
-		args.add(new FunctionArgument(null, visit(ctx.expr(0))));
-		args.add(new FunctionArgument(null, visit(ctx.expr(1))));
+		List<FunctionParameterDefinition> args = new ArrayList<>();
+		args.add(new FunctionParameterDefinition(null, visit(ctx.expr(0))));
+		args.add(new FunctionParameterDefinition(null, visit(ctx.expr(1))));
 
 		return resolveFunctionType(functionName, args);
 	}
 
 	private ExpressionType resolveFunctionType(
-		String functionName, List<FunctionArgument> params)
+		String functionName, List<FunctionParameterDefinition> argDefs)
 	{
 		if (functionTypeResolver == null) {
 			throw new ExpressionException("Cannot validate function " +
 				functionName + " because no function executor was set.");
 		}
-		return functionTypeResolver.resolveType(functionName, params);
+		return functionTypeResolver.resolveType(functionName, argDefs);
 	}
 
 	@Override

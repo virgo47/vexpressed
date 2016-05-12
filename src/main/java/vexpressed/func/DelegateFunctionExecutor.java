@@ -4,10 +4,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import vexpressed.ExpressionType;
 
@@ -57,13 +61,32 @@ public class DelegateFunctionExecutor
 				if (functionName.isEmpty()) {
 					functionName = method.getName();
 				}
-				methodMap.put(functionName,
-					new MethodInfo(delegate, method,
-						annotation.paramNames(), method.getReturnType()));
+
+				methodMap.put(functionName, createMethodInfo(delegate, method, annotation));
 			}
 		}
 
 		return this;
+	}
+
+	private MethodInfo createMethodInfo(
+		Object delegate, Method method, ExpressionFunction annotation)
+	{
+		Parameter[] methodParameters = method.getParameters();
+		FunctionParameterDefinition[] paramDefs =
+			new FunctionParameterDefinition[methodParameters.length];
+
+		for (int i = 0; i < paramDefs.length; i++) {
+			String[] annotatedNames = annotation != null ? annotation.paramNames() : null;
+			paramDefs[i] = new FunctionParameterDefinition(
+				annotatedNames != null && annotatedNames.length > i
+					? annotatedNames[i]
+					: methodParameters[i].getName(),
+				ExpressionType.fromClass(methodParameters[i].getType()));
+		}
+
+		return new MethodInfo(delegate, method,
+			method.getReturnType(), paramDefs);
 	}
 
 	/**
@@ -81,8 +104,7 @@ public class DelegateFunctionExecutor
 				delegate = null;
 			}
 			Method method = delegateClass.getDeclaredMethod(methodName, parameterTypes);
-			methodMap.put(functionName, new MethodInfo(
-				delegate, method, null, method.getReturnType()));
+			methodMap.put(functionName, createMethodInfo(delegate, method, null));
 		} catch (NoSuchMethodException e) {
 			throw new IllegalArgumentException(
 				"Invalid method specified for function " + functionName, e);
@@ -118,14 +140,7 @@ public class DelegateFunctionExecutor
 		Object[] args = new Object[method.getParameterCount()];
 		int paramIndex = 0;
 		for (Parameter parameter : method.getParameters()) {
-			// likely returns argX, unless javac was used with -parameters
-			String paramName = parameter.getName();
-			if (methodInfo.paramNames != null
-				&& methodInfo.paramNames.length > paramIndex
-				&& methodInfo.paramNames[paramIndex] != null)
-			{
-				paramName = methodInfo.paramNames[paramIndex]; // explicit name from annotation
-			}
+			String paramName = methodInfo.paramDefinitions[paramIndex].name;
 
 			Object arg = resolveParam(params, paramName);
 			if (parameter.getType() == BigDecimal.class
@@ -144,7 +159,7 @@ public class DelegateFunctionExecutor
 	private Object resolveParam(List<FunctionArgument> params, String name) {
 		for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
 			FunctionArgument param = iterator.next();
-			if (name.equals(param.name)) {
+			if (name.equals(param.parameterName)) {
 				iterator.remove();
 				return param.value;
 			}
@@ -153,7 +168,7 @@ public class DelegateFunctionExecutor
 		// find first unnamed then
 		for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
 			FunctionArgument param = iterator.next();
-			if (param.name == null) {
+			if (param.parameterName == null) {
 				iterator.remove();
 				return param.value;
 			}
@@ -162,23 +177,36 @@ public class DelegateFunctionExecutor
 	}
 
 	@Override
-	public ExpressionType resolveType(String functionName, List<FunctionArgument> params) {
-		return ExpressionType.fromClass(
-			getMethodInfo(functionName).returnType);
+	public ExpressionType resolveType(
+		String functionName, List<FunctionParameterDefinition> argumentDefinitions)
+	{
+		return getMethodInfo(functionName).returnExpressionType;
+	}
+
+	public Set<FunctionDefinition> functionInfo() {
+		return methodMap.entrySet().stream()
+			.map(e -> new FunctionDefinition(e.getKey(),
+				e.getValue().returnExpressionType, e.getValue().paramDefinitions))
+			.collect(Collectors.toCollection(() ->
+				new TreeSet<>(Comparator.comparing(fd -> fd.name))));
 	}
 
 	private static class MethodInfo {
 
 		private final Object object;
 		private final Method method;
-		private final String[] paramNames;
 		private final Class returnType;
+		private final ExpressionType returnExpressionType;
+		private final FunctionParameterDefinition[] paramDefinitions;
 
-		MethodInfo(Object object, Method method, String[] paramNames, Class returnType) {
+		MethodInfo(Object object, Method method,
+			Class returnType, FunctionParameterDefinition[] paramDefinitions)
+		{
 			this.object = object;
 			this.method = method;
-			this.paramNames = paramNames;
 			this.returnType = returnType;
+			returnExpressionType = ExpressionType.fromClass(returnType);
+			this.paramDefinitions = paramDefinitions;
 		}
 	}
 }

@@ -2,15 +2,15 @@ package vexpressed.func;
 
 public class FunctionArgument {
 
-	public final String name;
+	public final String parameterName;
 	public final Object value;
 
-	public FunctionArgument(String name, Object value) {
-		this.name = name;
+	public FunctionArgument(String parameterName, Object value) {
+		this.parameterName = parameterName;
 		this.value = value;
 	}
 
 	@Override public String toString() {
-		return (name != null ? name + ':' : "") + value;
+		return (parameterName != null ? parameterName + ':' : "") + value;
 	}
 }
