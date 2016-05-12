@@ -19,6 +19,7 @@ import vexpressed.vars.ExpressionVariableTypeResolver;
  */
 public class BaseExpressionEvaluator {
 
+	public static final int NO_CACHING = 0;
 	public static final int DEFAULT_CACHE_CAPACITY = 50;
 
 	private final ParseCache expressionCache;
@@ -28,10 +29,10 @@ public class BaseExpressionEvaluator {
 
 	/** Creates evaluator with specified cache size - size of 0 disables caching. */
 	public BaseExpressionEvaluator(int cacheCapacity) {
-		if (cacheCapacity > 0) {
+		if (cacheCapacity != NO_CACHING) {
 			expressionCache = new LruParseCache(cacheCapacity);
 		} else {
-			expressionCache = new DisabledParseCache();
+			expressionCache = DisabledParseCache.INSTANCE;
 		}
 	}
 
@@ -130,6 +131,8 @@ public class BaseExpressionEvaluator {
 	}
 
 	private static class DisabledParseCache implements ParseCache {
+
+		private static final DisabledParseCache INSTANCE = new DisabledParseCache();
 
 		@Override public ParseTree get(String expression) {
 			return null;
