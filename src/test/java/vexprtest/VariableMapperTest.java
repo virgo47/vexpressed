@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.assertj.core.api.Condition;
 import org.testng.annotations.Test;
+import vexpressed.ExpressionType;
 import vexpressed.vars.UnknownVariable;
 import vexpressed.vars.VariableDefinition;
 import vexpressed.vars.VariableMapper;
@@ -112,5 +113,27 @@ public class VariableMapperTest {
 		VariableDefinition var2 = iterator.next();
 		assertThat(var2.name).isEqualTo("y");
 		assertThat(var2.type).isEqualTo(OBJECT);
+	}
+
+	@Test
+	public void variableMapperReturnsVariableType() {
+		VariableMapper<Object> variables = new VariableMapper<>()
+			.define("x", STRING, o -> null);
+
+		assertThat(variables.variableType("x")).isEqualTo(STRING);
+	}
+
+	@Test
+	public void variableMapperReturnsVariableTypeAlsoForDelegatedVariable() {
+		VariableMapper<Object> delegate1 = new VariableMapper<>()
+			.define("x", STRING, o -> null);
+		VariableMapper<Object> delegate2 = new VariableMapper<>()
+			.define("y", OBJECT, o -> null);
+		VariableMapper<Object> variables = new VariableMapper<>()
+			.addDelegate(delegate1, o -> o)
+			.addDelegate(delegate2, o -> o);
+
+		assertThat(variables.variableType("x")).isEqualTo(STRING);
+		assertThat(variables.variableType("y")).isEqualTo(OBJECT);
 	}
 }

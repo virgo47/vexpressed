@@ -107,9 +107,21 @@ public class VariableMapper<T> {
 	public ExpressionType variableType(String variableName) {
 		ExpressionType expressionType = variableTypes.get(variableName);
 		if (expressionType == null) {
-			throw new UnknownVariable(variableName);
+			for (MapperDelegate delegate : mapperDelegates) {
+				expressionType = delegate.delegateMapper.variableTypeInternal(variableName);
+				if (expressionType != null) break;
+			}
 		}
-		return expressionType;
+
+		if (expressionType != null) {
+			return expressionType;
+		}
+
+		throw new UnknownVariable(variableName);
+	}
+
+	private ExpressionType variableTypeInternal(String variableName) {
+		return variableTypes.get(variableName);
 	}
 
 	private static class MapperDelegate {
