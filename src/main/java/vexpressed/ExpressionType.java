@@ -69,7 +69,7 @@ public enum ExpressionType {
 			case DECIMAL:
 				return value instanceof BigDecimal
 					? value
-					: new Integer(value.toString());
+					: new BigDecimal(value.toString());
 			case DATE:
 				return value instanceof LocalDate
 					? value
