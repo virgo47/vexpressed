@@ -1,6 +1,9 @@
 /*
-SQL like expression syntax (like WHERE clause), inspired by this grammar:
+Java/EL-meets-SQL like expression syntax, originally inspired by this grammar:
 https://github.com/antlr/grammars-v4/blob/master/sqlite/SQLite.g4
+
+Class generation is part of Maven build nothing needs to be done. Following lines
+describe manual generation and are only just for my personal information:
 
 Use IDE with ANTLR v4 plugin to generate classes:
 - first set-up (right-click on the file, Configure ANTLR...)
@@ -15,7 +18,8 @@ Command line when using downloaded "Complete ANTLR 4.5.1 Java binaries jar" (ver
 - -o . means this directory (can be omitted), in IDEA it somehow adds package to the output directory
   but this command does not do that, it merely sets pacakage in sources
 
-DON'T FORGET: svn add any missing *.java file (they are probably added, but just in case...)
+After first manual generation - don't forget:
+svn add any missing *.java file (they are probably added, but just in case...)
 *.tokens files are NOT necessary for runtime, don't add those!
 */
 grammar Expr;
@@ -34,6 +38,7 @@ expr: STRING_LITERAL # stringLiteral
 	| expr op=(OP_AND | OP_OR) expr # logicOp
 	| ID '(' params=paramlist? ')' # function
 	| expr ID expr # infixFunction
+	| expr CUSTOM_OP expr # customOp
 	| ID # variable
 	| '(' expr ')' # parens
 	;
@@ -64,6 +69,7 @@ BOOLEAN_LITERAL: T R U E | T
 	| F A L S E | F
 	;
 
+// dot is allowed only because syntax does not directly support attribute paths/method calls (yet)
 ID: [a-zA-Z$_][a-zA-Z0-9$_.]*;
 
 NUMERIC_LITERAL : DIGIT+ ( '.' DIGIT* )? ( E [-+]? DIGIT+ )?
@@ -77,6 +83,9 @@ SPACES : [ \u000B\t\r\n] -> channel(HIDDEN) ;
 COMMENT : '/*' .*? '*/' -> skip ;
 
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
+
+// after line comment and comment and similar things not to overshadow them
+CUSTOM_OP: [#+*/<>=!|.;:?~_@$%^&-]+;
 
 UNEXPECTED_CHAR : . ;
 

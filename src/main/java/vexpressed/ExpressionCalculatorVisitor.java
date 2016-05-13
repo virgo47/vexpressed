@@ -341,13 +341,21 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 		return new FunctionArgument(argName, visit(ctx.expr()));
 	}
 
-	@Override public Object visitInfixFunction(ExprParser.InfixFunctionContext ctx) {
+	@Override
+	public Object visitInfixFunction(ExprParser.InfixFunctionContext ctx) {
 		String functionName = ctx.ID().getText();
 		List<FunctionArgument> args = new ArrayList<>();
 		args.add(new FunctionArgument(null, visit(ctx.expr(0))));
 		args.add(new FunctionArgument(null, visit(ctx.expr(1))));
 
 		return executeFunction(functionName, args);
+	}
+
+	@Override
+	public Object visitCustomOp(ExprParser.CustomOpContext ctx) {
+		String optext = ctx.CUSTOM_OP().getText();
+		System.out.println("\nOPTEXT = " + optext);
+		return super.visitCustomOp(ctx);
 	}
 
 	private Object executeFunction(String functionName, List<FunctionArgument> params) {
