@@ -2,10 +2,12 @@ package vexpressed;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import vexpressed.func.DelegateFunctionExecutor;
+import vexpressed.func.FunctionDefinition;
 import vexpressed.vars.ExpressionVariableResolver;
 import vexpressed.vars.ExpressionVariableTypeResolver;
 
@@ -91,6 +93,10 @@ public class BaseExpressionEvaluator {
 			expressionCache.put(expression, parseTree);
 		}
 		return parseTree;
+	}
+
+	public Set<FunctionDefinition> functionInfo() {
+		return functionExecutor.functionInfo();
 	}
 
 	private interface ParseCache {
