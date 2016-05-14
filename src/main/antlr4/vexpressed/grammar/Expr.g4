@@ -31,14 +31,14 @@ expr: STRING_LITERAL # stringLiteral
    	| NUMERIC_LITERAL # numericLiteral
 	| K_NULL # nullLiteral
 	| op=('-' | '+') expr # unarySign
+	| expr CUSTOM_OP expr # customOp // custom op made of symbols is higher than other binary ops
 	| expr op=(OP_MUL | OP_DIV | OP_MOD) expr # arithmeticOp
 	| expr op=(OP_ADD | OP_SUB) expr # arithmeticOp
+	| expr ID expr # infixFunction // function made of words (typically) is after arithmetic
 	| expr op=(OP_LT | OP_GT | OP_EQ | OP_NE | OP_LE | OP_GE) expr # comparisonOp
 	| expr K_IS not=K_NOT? K_NULL # isNull
 	| expr op=(OP_AND | OP_OR) expr # logicOp
 	| ID '(' params=paramlist? ')' # function
-	| expr ID expr # infixFunction
-	| expr CUSTOM_OP expr # customOp
 	| ID # variable
 	| '(' expr ')' # parens
 	;
