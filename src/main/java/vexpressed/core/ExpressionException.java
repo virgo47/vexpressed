@@ -1,4 +1,4 @@
-package vexpressed;
+package vexpressed.core;
 
 public class ExpressionException extends RuntimeException {
 

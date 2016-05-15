@@ -1,13 +1,13 @@
 package vexpressed;
 
+import vexpressed.support.ExpressionFunction;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-
-import vexpressed.func.ExpressionFunction;
 
 public class BasicFunctions {
 

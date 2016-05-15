@@ -1,6 +1,4 @@
-package vexpressed.func;
-
-import vexpressed.ExpressionType;
+package vexpressed.meta;
 
 /** Metadata about function. */
 public class FunctionDefinition {
@@ -9,7 +7,7 @@ public class FunctionDefinition {
 	public final ExpressionType returnType;
 	public final FunctionParameterDefinition[] arguments;
 
-	FunctionDefinition(String name, ExpressionType returnType,
+	public FunctionDefinition(String name, ExpressionType returnType,
 		FunctionParameterDefinition[] arguments)
 	{
 		this.name = name;

@@ -2,28 +2,28 @@ package vexprtest;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.testng.Assert.assertEquals;
-import static vexpressed.ExpressionType.BOOLEAN;
-import static vexpressed.ExpressionType.DATE;
-import static vexpressed.ExpressionType.DECIMAL;
-import static vexpressed.ExpressionType.INTEGER;
-import static vexpressed.ExpressionType.OBJECT;
-import static vexpressed.ExpressionType.STRING;
+import static vexpressed.meta.ExpressionType.BOOLEAN;
+import static vexpressed.meta.ExpressionType.DATE;
+import static vexpressed.meta.ExpressionType.DECIMAL;
+import static vexpressed.meta.ExpressionType.INTEGER;
+import static vexpressed.meta.ExpressionType.OBJECT;
+import static vexpressed.meta.ExpressionType.STRING;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import vexpressed.ExpressionException;
-import vexpressed.ExpressionType;
-import vexpressed.ExpressionUtils;
-import vexpressed.ExpressionValidatorVisitor;
-import vexpressed.func.DelegateFunctionExecutor;
-import vexpressed.func.ExpressionFunctionTypeResolver;
-import vexpressed.vars.ExpressionVariableTypeResolver;
+import vexpressed.core.ExpressionException;
+import vexpressed.meta.ExpressionType;
+import vexpressed.VexpressedUtils;
+import vexpressed.validation.ExpressionValidatorVisitor;
+import vexpressed.support.DelegateFunctionExecutor;
+import vexpressed.validation.FunctionTypeResolver;
+import vexpressed.validation.VariableTypeResolver;
 
 public class ExpressionValidatorTest {
 
-	private ExpressionVariableTypeResolver variableTypeResolver;
-	private ExpressionFunctionTypeResolver functionTypeResolver;
+	private VariableTypeResolver variableTypeResolver;
+	private FunctionTypeResolver functionTypeResolver;
 
 	@BeforeMethod
 	public void init() {
@@ -256,7 +256,7 @@ public class ExpressionValidatorTest {
 	}
 
 	private ExpressionType expr(String expression) {
-		ParseTree parseTree = ExpressionUtils.createParseTree(expression);
+		ParseTree parseTree = VexpressedUtils.createParseTree(expression);
 		return new ExpressionValidatorVisitor(variableTypeResolver)
 			.withFunctionTypeResolver(functionTypeResolver)
 			.visit(parseTree);

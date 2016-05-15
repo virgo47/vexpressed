@@ -1,9 +1,6 @@
-package vexpressed;
+package vexpressed.meta;
 
 import java.util.Set;
-
-import vexpressed.func.FunctionDefinition;
-import vexpressed.vars.VariableDefinition;
 
 /** Metadata about known variables and functions (identifiers) for a particular expression. */
 public class ExpressionIdentifiers {

@@ -11,14 +11,14 @@ import java.time.LocalDate;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import vexpressed.ExpressionCalculatorVisitor;
-import vexpressed.ExpressionException;
-import vexpressed.ExpressionUtils;
-import vexpressed.vars.ExpressionVariableResolver;
+import vexpressed.core.ExpressionCalculatorVisitor;
+import vexpressed.core.ExpressionException;
+import vexpressed.VexpressedUtils;
+import vexpressed.core.VariableResolver;
 
 public class ExpressionBasicTest {
 
-	private ExpressionVariableResolver variableResolver;
+	private VariableResolver variableResolver;
 
 	@BeforeMethod
 	public void init() {
@@ -291,7 +291,7 @@ public class ExpressionBasicTest {
 	}
 
 	private Object expr(String expression) {
-		ParseTree parseTree = ExpressionUtils.createParseTree(expression);
+		ParseTree parseTree = VexpressedUtils.createParseTree(expression);
 		return new ExpressionCalculatorVisitor(variableResolver)
 			.visit(parseTree);
 	}

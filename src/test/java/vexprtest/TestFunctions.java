@@ -2,7 +2,7 @@ package vexprtest;
 
 import java.math.BigDecimal;
 
-import vexpressed.func.ExpressionFunction;
+import vexpressed.support.ExpressionFunction;
 
 /** @noinspection WeakerAccess*/
 public class TestFunctions {

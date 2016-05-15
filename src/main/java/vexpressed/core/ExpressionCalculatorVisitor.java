@@ -1,4 +1,4 @@
-package vexpressed;
+package vexpressed.core;
 
 import static vexpressed.grammar.ExprParser.ArithmeticOpContext;
 import static vexpressed.grammar.ExprParser.BooleanLiteralContext;
@@ -24,6 +24,9 @@ import static vexpressed.grammar.ExprParser.ParensContext;
 import static vexpressed.grammar.ExprParser.StringLiteralContext;
 import static vexpressed.grammar.ExprParser.VariableContext;
 
+import vexpressed.grammar.ExprBaseVisitor;
+import vexpressed.grammar.ExprParser;
+
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
@@ -36,12 +39,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
-import vexpressed.func.ExpressionFunctionExecutor;
-import vexpressed.func.FunctionArgument;
-import vexpressed.func.FunctionExecutionFailed;
-import vexpressed.grammar.ExprBaseVisitor;
-import vexpressed.grammar.ExprParser;
-import vexpressed.vars.ExpressionVariableResolver;
 
 /** Evaluates the expression - resolver for variables is mandatory, for functions optional. */
 public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
@@ -49,14 +46,14 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	public static final int DEFAULT_MAX_SCALE = 15;
 	public static final int DEFAULT_MAX_RESULT_SCALE = 6;
 
-	private final ExpressionVariableResolver variableResolver;
-	private ExpressionFunctionExecutor functionExecutor;
+	private final VariableResolver variableResolver;
+	private FunctionExecutor functionExecutor;
 
 	private int maxScale = DEFAULT_MAX_SCALE;
 	private int maxResultScale = DEFAULT_MAX_RESULT_SCALE;
 	private int roundingMode = BigDecimal.ROUND_HALF_UP;
 
-	public ExpressionCalculatorVisitor(ExpressionVariableResolver variableResolver) {
+	public ExpressionCalculatorVisitor(VariableResolver variableResolver) {
 		if (variableResolver == null) {
 			throw new IllegalArgumentException("Variable resolver must be provided");
 		}
@@ -64,7 +61,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	public ExpressionCalculatorVisitor withFunctionExecutor(
-		ExpressionFunctionExecutor functionExecutor)
+		FunctionExecutor functionExecutor)
 	{
 		this.functionExecutor = functionExecutor;
 		return this;

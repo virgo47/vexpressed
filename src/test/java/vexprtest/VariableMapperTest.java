@@ -2,19 +2,18 @@ package vexprtest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static vexpressed.ExpressionType.DECIMAL;
-import static vexpressed.ExpressionType.OBJECT;
-import static vexpressed.ExpressionType.STRING;
+import static vexpressed.meta.ExpressionType.DECIMAL;
+import static vexpressed.meta.ExpressionType.OBJECT;
+import static vexpressed.meta.ExpressionType.STRING;
 
 import java.util.Iterator;
 import java.util.Set;
 
 import org.assertj.core.api.Condition;
 import org.testng.annotations.Test;
-import vexpressed.ExpressionType;
-import vexpressed.vars.UnknownVariable;
-import vexpressed.vars.VariableDefinition;
-import vexpressed.vars.VariableMapper;
+import vexpressed.core.UnknownVariable;
+import vexpressed.meta.VariableDefinition;
+import vexpressed.support.VariableMapper;
 
 public class VariableMapperTest {
 

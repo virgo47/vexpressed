@@ -12,7 +12,7 @@ import java.util.Arrays;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import vexpressed.BaseExpressionEvaluator;
-import vexpressed.func.FunctionExecutionFailed;
+import vexpressed.core.FunctionExecutionFailed;
 
 public class BaseExpressionEvaluatorTest {
 

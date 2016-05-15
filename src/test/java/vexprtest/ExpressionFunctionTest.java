@@ -8,17 +8,17 @@ import java.math.BigDecimal;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import vexpressed.ExpressionCalculatorVisitor;
-import vexpressed.ExpressionUtils;
-import vexpressed.func.DelegateFunctionExecutor;
-import vexpressed.func.ExpressionFunctionExecutor;
-import vexpressed.func.FunctionExecutionFailed;
-import vexpressed.vars.ExpressionVariableResolver;
+import vexpressed.core.ExpressionCalculatorVisitor;
+import vexpressed.VexpressedUtils;
+import vexpressed.support.DelegateFunctionExecutor;
+import vexpressed.core.FunctionExecutor;
+import vexpressed.core.FunctionExecutionFailed;
+import vexpressed.core.VariableResolver;
 
 public class ExpressionFunctionTest {
 
-	private ExpressionVariableResolver variableResolver;
-	private ExpressionFunctionExecutor functionExecutor;
+	private VariableResolver variableResolver;
+	private FunctionExecutor functionExecutor;
 
 	@BeforeMethod
 	public void init() {
@@ -87,7 +87,7 @@ public class ExpressionFunctionTest {
 	}
 
 	private Object expr(String expression) {
-		ParseTree parseTree = ExpressionUtils.createParseTree(expression);
+		ParseTree parseTree = VexpressedUtils.createParseTree(expression);
 		return new ExpressionCalculatorVisitor(variableResolver)
 			.withFunctionExecutor(functionExecutor)
 			.visit(parseTree);

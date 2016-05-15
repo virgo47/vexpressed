@@ -1,5 +1,12 @@
 package vexpressed;
 
+import vexpressed.core.ExpressionCalculatorVisitor;
+import vexpressed.core.ExpressionException;
+import vexpressed.core.FunctionExecutor;
+import vexpressed.core.VariableResolver;
+import vexpressed.grammar.ExprLexer;
+import vexpressed.grammar.ExprParser;
+
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -8,13 +15,32 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
-import vexpressed.grammar.ExprLexer;
-import vexpressed.grammar.ExprParser;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
-public final class ExpressionUtils {
+public final class VexpressedUtils {
 
 	private static final ANTLRErrorListener ERROR_LISTENER = new ExceptionThrowingErrorListener();
 
+	/**
+	 * Evaluates the expression using provided {@link VariableResolver} and
+	 * {@link FunctionExecutor}. This always parses the expression so it is not
+	 * "production-ready" because it is better to cache the parse trees for the
+	 * same expression.
+	 */
+	public static Object eval(String experssion,
+		VariableResolver variableResolver, FunctionExecutor functionExecutor)
+	{
+		ParseTree parseTree = createParseTree(experssion);
+		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
+			.withFunctionExecutor(functionExecutor);
+		return visitor.visit(parseTree);
+	}
+
+	/**
+	 * Parses expression and returns the {@link ParseTree} for further usage. This is
+	 * slow operation compared to evaluation itself, so it is recommended to cache parse
+	 * trees for repeated evaluations of the same expression.
+	 */
 	public static ParseTree createParseTree(String expression) {
 		ANTLRInputStream input = new ANTLRInputStream(expression);
 		ExprLexer lexer = new ExprLexer(input);

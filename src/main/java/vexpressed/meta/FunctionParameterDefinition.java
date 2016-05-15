@@ -1,6 +1,4 @@
-package vexpressed.func;
-
-import vexpressed.ExpressionType;
+package vexpressed.meta;
 
 /** Metadata about function parameter. */
 public class FunctionParameterDefinition {

@@ -1,4 +1,4 @@
-package vexpressed;
+package vexpressed.meta;
 
 import java.math.BigDecimal;
 import java.time.Instant;

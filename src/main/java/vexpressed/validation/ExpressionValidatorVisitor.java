@@ -1,12 +1,5 @@
-package vexpressed;
+package vexpressed.validation;
 
-import static vexpressed.ExpressionType.BOOLEAN;
-import static vexpressed.ExpressionType.DATE;
-import static vexpressed.ExpressionType.DATE_TIME;
-import static vexpressed.ExpressionType.DECIMAL;
-import static vexpressed.ExpressionType.INTEGER;
-import static vexpressed.ExpressionType.STRING;
-import static vexpressed.ExpressionType.TIMESTAMP;
 import static vexpressed.grammar.ExprParser.ArithmeticOpContext;
 import static vexpressed.grammar.ExprParser.BooleanLiteralContext;
 import static vexpressed.grammar.ExprParser.ComparisonOpContext;
@@ -19,25 +12,31 @@ import static vexpressed.grammar.ExprParser.OP_SUB;
 import static vexpressed.grammar.ExprParser.ParensContext;
 import static vexpressed.grammar.ExprParser.StringLiteralContext;
 import static vexpressed.grammar.ExprParser.VariableContext;
+import static vexpressed.meta.ExpressionType.BOOLEAN;
+import static vexpressed.meta.ExpressionType.DATE;
+import static vexpressed.meta.ExpressionType.DATE_TIME;
+import static vexpressed.meta.ExpressionType.DECIMAL;
+import static vexpressed.meta.ExpressionType.INTEGER;
+import static vexpressed.meta.ExpressionType.STRING;
+import static vexpressed.meta.ExpressionType.TIMESTAMP;
+
+import vexpressed.grammar.ExprBaseVisitor;
+import vexpressed.grammar.ExprParser;
+import vexpressed.meta.ExpressionType;
+import vexpressed.meta.FunctionParameterDefinition;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import vexpressed.func.ExpressionFunctionTypeResolver;
-import vexpressed.func.FunctionParameterDefinition;
-import vexpressed.grammar.ExprBaseVisitor;
-import vexpressed.grammar.ExprParser;
-import vexpressed.vars.ExpressionVariableTypeResolver;
-
 /** Validates the expression - resolver for variables is mandatory, for functions optional. */
 public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> {
 
-	private final ExpressionVariableTypeResolver variableTypeResolver;
-	private ExpressionFunctionTypeResolver functionTypeResolver;
+	private final VariableTypeResolver variableTypeResolver;
+	private FunctionTypeResolver functionTypeResolver;
 
-	public ExpressionValidatorVisitor(ExpressionVariableTypeResolver variableTypeResolver) {
+	public ExpressionValidatorVisitor(VariableTypeResolver variableTypeResolver) {
 		if (variableTypeResolver == null) {
 			throw new IllegalArgumentException("Variable type resolver must be provided");
 		}
@@ -45,7 +44,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 	}
 
 	public ExpressionValidatorVisitor withFunctionTypeResolver(
-		ExpressionFunctionTypeResolver functionTypeResolver)
+		FunctionTypeResolver functionTypeResolver)
 	{
 		this.functionTypeResolver = functionTypeResolver;
 		return this;
@@ -56,7 +55,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 		ExpressionType left = visitNotNull(ctx.expr(0));
 		ExpressionType right = visitNotNull(ctx.expr(1));
 		if (left != BOOLEAN || right != BOOLEAN) {
-			throw new ExpressionException(
+			throw new ExpressionValidationFailed(
 				"Both sides must be of type BOOLEAN for logic operation. Actual types: " +
 					left + ", " + right);
 		}
@@ -75,7 +74,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 			{
 				return left;
 			} else {
-				throw new ExpressionException("Arithmetic operation " + ctx.op.getText() +
+				throw new ExpressionValidationFailed("Arithmetic operation " + ctx.op.getText() +
 					" not supported on temporal type " + left + " and " + right);
 			}
 		}
@@ -88,7 +87,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 			return commonNumberType;
 		}
 
-		throw new ExpressionException("Arithmetic operation " + ctx.op.getText() +
+		throw new ExpressionValidationFailed("Arithmetic operation " + ctx.op.getText() +
 			" not supported for types " + left + " and " + right);
 	}
 
@@ -125,7 +124,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 			return BOOLEAN;
 		}
 
-		throw new ExpressionException(
+		throw new ExpressionValidationFailed(
 			"Invalid comparison/relation operation between type " + left + " and " + right);
 	}
 
@@ -165,7 +164,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 	public ExpressionType visitUnarySign(ExprParser.UnarySignContext ctx) {
 		ExpressionType type = visitNotNull(ctx.expr());
 		if (type != INTEGER && type != DECIMAL) {
-			throw new ExpressionException(
+			throw new ExpressionValidationFailed(
 				"Unary sign can be applied only to numbers, not to " + type);
 		}
 		return type;
@@ -209,7 +208,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 		String functionName, List<FunctionParameterDefinition> argDefs)
 	{
 		if (functionTypeResolver == null) {
-			throw new ExpressionException("Cannot validate function " +
+			throw new ExpressionValidationFailed("Cannot validate function " +
 				functionName + " because no function executor was set.");
 		}
 		return functionTypeResolver.resolveType(functionName, argDefs);
@@ -228,7 +227,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 	private ExpressionType visitNotNull(ExprParser.ExprContext expr) {
 		ExpressionType result = visit(expr);
 		if (result == null) {
-			throw new ExpressionException(
+			throw new ExpressionValidationFailed(
 				"Null value not allowed here: " + expr.toStringTree());
 		}
 

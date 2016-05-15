@@ -1,6 +1,4 @@
-package vexpressed.func;
-
-import vexpressed.ExpressionException;
+package vexpressed.core;
 
 public class FunctionExecutionFailed extends ExpressionException {
 

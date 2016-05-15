@@ -1,4 +1,12 @@
-package vexpressed.func;
+package vexpressed.support;
+
+import vexpressed.core.FunctionArgument;
+import vexpressed.core.FunctionExecutionFailed;
+import vexpressed.core.FunctionExecutor;
+import vexpressed.meta.ExpressionType;
+import vexpressed.meta.FunctionDefinition;
+import vexpressed.meta.FunctionParameterDefinition;
+import vexpressed.validation.FunctionTypeResolver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,8 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import vexpressed.ExpressionType;
 
 /**
  * Function executor delegating function calls to another object. Every registered function
@@ -32,7 +38,7 @@ import vexpressed.ExpressionType;
  * method/function will be overridden and lost.
  */
 public class DelegateFunctionExecutor
-	implements ExpressionFunctionExecutor, ExpressionFunctionTypeResolver
+	implements FunctionExecutor, FunctionTypeResolver
 {
 
 	private final Map<String, MethodInfo> methodMap = new HashMap<>();

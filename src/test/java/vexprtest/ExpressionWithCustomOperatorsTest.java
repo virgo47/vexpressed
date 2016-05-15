@@ -5,15 +5,15 @@ import static org.testng.Assert.assertEquals;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import vexpressed.ExpressionCalculatorVisitor;
-import vexpressed.ExpressionUtils;
-import vexpressed.func.ExpressionFunctionExecutor;
-import vexpressed.vars.ExpressionVariableResolver;
+import vexpressed.core.ExpressionCalculatorVisitor;
+import vexpressed.VexpressedUtils;
+import vexpressed.core.FunctionExecutor;
+import vexpressed.core.VariableResolver;
 
 public class ExpressionWithCustomOperatorsTest {
 
-	private ExpressionVariableResolver variableResolver;
-	private ExpressionFunctionExecutor functionExecutor;
+	private VariableResolver variableResolver;
+	private FunctionExecutor functionExecutor;
 
 	@BeforeMethod
 	public void init() {
@@ -35,7 +35,7 @@ public class ExpressionWithCustomOperatorsTest {
 	}
 
 	private Object expr(String expression) {
-		ParseTree parseTree = ExpressionUtils.createParseTree(expression);
+		ParseTree parseTree = VexpressedUtils.createParseTree(expression);
 		return new ExpressionCalculatorVisitor(variableResolver)
 			.withFunctionExecutor(functionExecutor)
 			.visit(parseTree);

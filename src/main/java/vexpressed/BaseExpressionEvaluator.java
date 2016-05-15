@@ -1,15 +1,19 @@
 package vexpressed;
 
+import vexpressed.core.ExpressionCalculatorVisitor;
+import vexpressed.core.VariableResolver;
+import vexpressed.meta.ExpressionType;
+import vexpressed.meta.FunctionDefinition;
+import vexpressed.support.DelegateFunctionExecutor;
+import vexpressed.validation.ExpressionValidatorVisitor;
+import vexpressed.validation.VariableTypeResolver;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import vexpressed.func.DelegateFunctionExecutor;
-import vexpressed.func.FunctionDefinition;
-import vexpressed.vars.ExpressionVariableResolver;
-import vexpressed.vars.ExpressionVariableTypeResolver;
 
 /**
  * Default/base expression evaluator with caching, including {@link BasicFunctions}.
@@ -61,9 +65,9 @@ public class BaseExpressionEvaluator {
 	 * of expression parsing.
 	 */
 	public ExpressionType check(
-		String expression, ExpressionVariableTypeResolver variableResolver)
+		String expression, VariableTypeResolver variableResolver)
 	{
-		ParseTree parseTree = ExpressionUtils.createParseTree(expression);
+		ParseTree parseTree = VexpressedUtils.createParseTree(expression);
 		ExpressionValidatorVisitor visitor = new ExpressionValidatorVisitor(variableResolver)
 			.withFunctionTypeResolver(functionExecutor);
 		return visitor.visit(parseTree);
@@ -73,15 +77,15 @@ public class BaseExpressionEvaluator {
 	 * Evaluates expression using provided variableResolver. Caches the result
 	 * of expression parsing for better performance of repeated executions.
 	 */
-	public Object eval(String expression, ExpressionVariableResolver variableResolver) {
+	public Object eval(String expression, VariableResolver variableResolver) {
 		ParseTree parseTree = expressionParseTree(expression);
 		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
 			.withFunctionExecutor(functionExecutor);
 		return visitor.visit(parseTree);
 	}
 
-	/** Like {@link #eval(String, ExpressionVariableResolver)} but casts the result to boolean. */
-	public boolean evalBoolean(String expression, ExpressionVariableResolver variableResolver) {
+	/** Like {@link #eval(String, VariableResolver)} but casts the result to boolean. */
+	public boolean evalBoolean(String expression, VariableResolver variableResolver) {
 		Object result = eval(expression, variableResolver);
 		return (boolean) result;
 	}
@@ -89,7 +93,7 @@ public class BaseExpressionEvaluator {
 	private ParseTree expressionParseTree(String expression) {
 		ParseTree parseTree = expressionCache.get(expression);
 		if (parseTree == null) {
-			parseTree = ExpressionUtils.createParseTree(expression);
+			parseTree = VexpressedUtils.createParseTree(expression);
 			expressionCache.put(expression, parseTree);
 		}
 		return parseTree;
@@ -140,11 +144,13 @@ public class BaseExpressionEvaluator {
 
 		private static final DisabledParseCache INSTANCE = new DisabledParseCache();
 
-		@Override public ParseTree get(String expression) {
+		@Override
+		public ParseTree get(String expression) {
 			return null;
 		}
 
-		@Override public ParseTree put(String expression, ParseTree parseTree) {
+		@Override
+		public ParseTree put(String expression, ParseTree parseTree) {
 			return null;
 		}
 	}
