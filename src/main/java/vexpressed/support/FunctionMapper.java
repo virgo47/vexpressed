@@ -119,20 +119,11 @@ public class FunctionMapper implements FunctionTypeResolver {
 		return this;
 	}
 
-	public Object execute(
-		String functionName, List<FunctionArgument> params, VariableResolver variableResolver)
+	@Override
+	public ExpressionType resolveType(
+		String functionName, List<FunctionParameterDefinition> argumentDefinitions)
 	{
-		MethodInfo methodInfo = getMethodInfo(functionName);
-
-		Object[] args = prepareArguments(params, methodInfo, variableResolver);
-		try {
-			return methodInfo.method.invoke(methodInfo.object, args);
-		} catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-			String reason = e.getCause() != null
-				? e.getCause().getMessage()
-				: e.getMessage();
-			throw new FunctionExecutionFailed(reason, e);
-		}
+		return getMethodInfo(functionName).returnExpressionType;
 	}
 
 	private MethodInfo getMethodInfo(String functionName) {
@@ -141,66 +132,6 @@ public class FunctionMapper implements FunctionTypeResolver {
 			throw new FunctionExecutionFailed("Function '" + functionName + "' was not registered");
 		}
 		return methodInfo;
-	}
-
-	private Object[] prepareArguments(
-		List<FunctionArgument> params, MethodInfo methodInfo, VariableResolver variableResolver)
-	{
-		ParameterInfo[] paramsInfo = methodInfo.paramsInfo;
-		Object[] args = new Object[paramsInfo.length];
-		int paramIndex = 0;
-		for (ParameterInfo parameterInfo : paramsInfo) {
-			Object arg;
-			if (parameterInfo.type == VariableResolver.class) {
-				arg = variableResolver;
-			} else {
-				String paramName = parameterInfo.name;
-
-				arg = resolveParam(params, paramName);
-				arg = coerceArgument(parameterInfo, arg);
-			}
-			args[paramIndex] = arg;
-			paramIndex += 1;
-		}
-		return args;
-	}
-
-	private Object coerceArgument(ParameterInfo parameterInfo, Object arg) {
-		if (parameterInfo.type == BigDecimal.class
-			&& arg != null
-			&& !(arg instanceof BigDecimal))
-		{
-			arg = new BigDecimal(arg.toString());
-		}
-		return arg;
-	}
-
-	/** Finds named argument or uses the first unnamed - <b>mutates the params list</b>. */
-	private Object resolveParam(List<FunctionArgument> params, String name) {
-		for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
-			FunctionArgument param = iterator.next();
-			if (name.equals(param.parameterName)) {
-				iterator.remove();
-				return param.value;
-			}
-		}
-
-		// find first unnamed then
-		for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
-			FunctionArgument param = iterator.next();
-			if (param.parameterName == null) {
-				iterator.remove();
-				return param.value;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public ExpressionType resolveType(
-		String functionName, List<FunctionParameterDefinition> argumentDefinitions)
-	{
-		return getMethodInfo(functionName).returnExpressionType;
 	}
 
 	public Set<FunctionDefinition> functionInfo() {
@@ -217,12 +148,12 @@ public class FunctionMapper implements FunctionTypeResolver {
 	 * variable resolver parameter.
 	 */
 	public FunctionExecutor executor(VariableResolver variableResolver) {
-		return (name, args) -> execute(name, args, variableResolver);
+		return new Executor(variableResolver);
 	}
 
 	/** Creates {@link FunctionExecutor} based on these function definitions (this object). */
 	public FunctionExecutor executor() {
-		return (name, args) -> execute(name, args, null);
+		return new Executor(null);
 	}
 
 	private static class MethodInfo {
@@ -264,6 +195,83 @@ public class FunctionMapper implements FunctionTypeResolver {
 
 		public FunctionParameterDefinition createDefinition() {
 			return new FunctionParameterDefinition(name, ExpressionType.fromClass(type));
+		}
+	}
+
+	private class Executor implements FunctionExecutor {
+
+		private final VariableResolver variableResolver;
+
+		private Executor(VariableResolver variableResolver) {
+			this.variableResolver = variableResolver;
+		}
+
+		@Override
+		public Object execute(String functionName, List<FunctionArgument> params) {
+			MethodInfo methodInfo = getMethodInfo(functionName);
+
+			Object[] args = prepareArguments(params, methodInfo, variableResolver);
+			try {
+				return methodInfo.method.invoke(methodInfo.object, args);
+			} catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+				String reason = e.getCause() != null
+					? e.getCause().getMessage()
+					: e.getMessage();
+				throw new FunctionExecutionFailed(reason, e);
+			}
+		}
+
+		private Object[] prepareArguments(
+			List<FunctionArgument> params, MethodInfo methodInfo, VariableResolver variableResolver)
+		{
+			ParameterInfo[] paramsInfo = methodInfo.paramsInfo;
+			Object[] args = new Object[paramsInfo.length];
+			int paramIndex = 0;
+			for (ParameterInfo parameterInfo : paramsInfo) {
+				Object arg;
+				if (parameterInfo.type == VariableResolver.class) {
+					arg = variableResolver;
+				} else {
+					String paramName = parameterInfo.name;
+
+					arg = resolveParam(params, paramName);
+					arg = coerceArgument(parameterInfo, arg);
+				}
+				args[paramIndex] = arg;
+				paramIndex += 1;
+			}
+			return args;
+		}
+
+		private Object coerceArgument(ParameterInfo parameterInfo, Object arg) {
+			if (parameterInfo.type == BigDecimal.class
+				&& arg != null
+				&& !(arg instanceof BigDecimal))
+			{
+				arg = new BigDecimal(arg.toString());
+			}
+			return arg;
+		}
+
+		/** Finds named argument or uses the first unnamed - <b>mutates the params list</b>. */
+		private Object resolveParam(List<FunctionArgument> params, String name) {
+			for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
+				FunctionArgument param = iterator.next();
+				if (name.equals(param.parameterName)) {
+					iterator.remove();
+					return param.value;
+				}
+			}
+
+			// find first unnamed then
+			for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
+				FunctionArgument param = iterator.next();
+				if (param.parameterName == null) {
+					iterator.remove();
+					return param.value;
+				}
+			}
+			return null;
 		}
 	}
 }
