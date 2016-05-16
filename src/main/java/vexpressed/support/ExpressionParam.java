@@ -26,4 +26,7 @@ public @interface ExpressionParam {
 	 */
 	// TODO what should "" mean for strings? Is it null? Can't we specify "" as default value?
 	String defaultValue() default "";
+
+	// TODO not used yet, but obviously doesn't go well with defaultValue :-)
+	boolean required() default false;
 }
