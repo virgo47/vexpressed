@@ -27,10 +27,10 @@ public final class VexpressedUtils {
 	 * "production-ready" because it is better to cache the parse trees for the
 	 * same expression.
 	 */
-	public static Object eval(String experssion,
+	public static Object eval(String expression,
 		VariableResolver variableResolver, FunctionExecutor functionExecutor)
 	{
-		ParseTree parseTree = createParseTree(experssion);
+		ParseTree parseTree = createParseTree(expression);
 		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
 			.withFunctionExecutor(functionExecutor);
 		return visitor.visit(parseTree);

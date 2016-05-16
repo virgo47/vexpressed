@@ -1,10 +1,5 @@
 package vexpressed.support;
 
-import vexpressed.core.VariableResolver;
-import vexpressed.core.UnknownVariable;
-import vexpressed.meta.ExpressionType;
-import vexpressed.meta.VariableDefinition;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,8 +10,14 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import vexpressed.core.UnknownVariable;
+import vexpressed.core.VariableResolver;
+import vexpressed.meta.ExpressionType;
+import vexpressed.meta.VariableDefinition;
+import vexpressed.validation.VariableTypeResolver;
+
 /** Configuration of supported variables for objects of type {@link T}. */
-public class VariableMapper<T> {
+public class VariableMapper<T> implements VariableTypeResolver {
 
 	private Map<String, Function<T, Object>> variableValueFunctions = new HashMap<>();
 	private Map<String, ExpressionType> variableTypes = new HashMap<>();
@@ -129,6 +130,11 @@ public class VariableMapper<T> {
 
 	public VariableResolver resolverFor(T object) {
 		return var -> resolveVariable(var, object);
+	}
+
+	@Override
+	public ExpressionType resolveType(String variableName) {
+		return null;
 	}
 
 	private static class MapperDelegate {

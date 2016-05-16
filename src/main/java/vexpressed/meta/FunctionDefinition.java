@@ -5,13 +5,13 @@ public class FunctionDefinition {
 
 	public final String name;
 	public final ExpressionType returnType;
-	public final FunctionParameterDefinition[] arguments;
+	public final FunctionParameterDefinition[] params;
 
 	public FunctionDefinition(String name, ExpressionType returnType,
-		FunctionParameterDefinition[] arguments)
+		FunctionParameterDefinition[] params)
 	{
 		this.name = name;
 		this.returnType = returnType;
-		this.arguments = arguments;
+		this.params = params;
 	}
 }

@@ -17,5 +17,6 @@ public @interface ExpressionFunction {
 	 * Array of parameter names in the order of method parameters.
 	 * If used, all parameters must be listed.
 	 */
+	@Deprecated // will be replaced by @ExpressionParam
 	String[] paramNames() default {};
 }

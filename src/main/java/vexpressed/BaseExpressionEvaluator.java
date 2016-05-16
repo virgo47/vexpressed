@@ -1,26 +1,25 @@
 package vexpressed;
 
-import vexpressed.core.ExpressionCalculatorVisitor;
-import vexpressed.core.VariableResolver;
-import vexpressed.meta.ExpressionType;
-import vexpressed.meta.FunctionDefinition;
-import vexpressed.support.DelegateFunctionExecutor;
-import vexpressed.validation.ExpressionValidatorVisitor;
-import vexpressed.validation.VariableTypeResolver;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import vexpressed.core.ExpressionCalculatorVisitor;
+import vexpressed.core.VariableResolver;
+import vexpressed.meta.ExpressionType;
+import vexpressed.meta.FunctionDefinition;
+import vexpressed.support.FunctionMapper;
+import vexpressed.validation.ExpressionValidatorVisitor;
+import vexpressed.validation.VariableTypeResolver;
 
 /**
  * Default/base expression evaluator with caching, including {@link BasicFunctions}.
  * Whenever repeated expression evaluation is expected with the same set of functions
  * this can be instantiated once and reused. Additional function definitions can
  * added with {@link #addFunctionsFrom(Object)} (scanning) or with {@link #addFunction(String,
- * Object, String, Class[])} (explicit function). See {@link DelegateFunctionExecutor} for more
+ * Object, String, Class[])} (explicit function). See {@link FunctionMapper} for more
  * as both methods are delegated to a single internal instance of this executor.
  */
 public class BaseExpressionEvaluator {
@@ -30,7 +29,7 @@ public class BaseExpressionEvaluator {
 
 	private final ParseCache expressionCache;
 
-	private DelegateFunctionExecutor functionExecutor = new DelegateFunctionExecutor()
+	private FunctionMapper functionMapper = new FunctionMapper()
 		.scanForFunctions(BasicFunctions.class);
 
 	/** Creates evaluator with specified cache size - size of 0 disables caching. */
@@ -48,14 +47,14 @@ public class BaseExpressionEvaluator {
 	}
 
 	public BaseExpressionEvaluator addFunctionsFrom(Object functionsDelegate) {
-		functionExecutor.scanForFunctions(functionsDelegate);
+		functionMapper.scanForFunctions(functionsDelegate);
 		return this;
 	}
 
 	public BaseExpressionEvaluator addFunction(
 		String functionName, Object delegate, String methodName, Class<?>... parameterTypes)
 	{
-		functionExecutor.registerFunction(
+		functionMapper.registerFunction(
 			functionName, delegate, methodName, parameterTypes);
 		return this;
 	}
@@ -65,11 +64,11 @@ public class BaseExpressionEvaluator {
 	 * of expression parsing.
 	 */
 	public ExpressionType check(
-		String expression, VariableTypeResolver variableResolver)
+		String expression, VariableTypeResolver variableTypeResolver)
 	{
 		ParseTree parseTree = VexpressedUtils.createParseTree(expression);
-		ExpressionValidatorVisitor visitor = new ExpressionValidatorVisitor(variableResolver)
-			.withFunctionTypeResolver(functionExecutor);
+		ExpressionValidatorVisitor visitor = new ExpressionValidatorVisitor(variableTypeResolver)
+			.withFunctionTypeResolver(functionMapper);
 		return visitor.visit(parseTree);
 	}
 
@@ -80,7 +79,7 @@ public class BaseExpressionEvaluator {
 	public Object eval(String expression, VariableResolver variableResolver) {
 		ParseTree parseTree = expressionParseTree(expression);
 		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
-			.withFunctionExecutor(functionExecutor);
+			.withFunctionExecutor(functionMapper.executor(variableResolver));
 		return visitor.visit(parseTree);
 	}
 
@@ -100,7 +99,7 @@ public class BaseExpressionEvaluator {
 	}
 
 	public Set<FunctionDefinition> functionInfo() {
-		return functionExecutor.functionInfo();
+		return functionMapper.functionInfo();
 	}
 
 	private interface ParseCache {

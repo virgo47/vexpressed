@@ -1,17 +1,10 @@
 package vexpressed.support;
 
-import vexpressed.core.FunctionArgument;
-import vexpressed.core.FunctionExecutionFailed;
-import vexpressed.core.FunctionExecutor;
-import vexpressed.meta.ExpressionType;
-import vexpressed.meta.FunctionDefinition;
-import vexpressed.meta.FunctionParameterDefinition;
-import vexpressed.validation.FunctionTypeResolver;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,7 +14,17 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import vexpressed.core.FunctionArgument;
+import vexpressed.core.FunctionExecutionFailed;
+import vexpressed.core.FunctionExecutor;
+import vexpressed.core.VariableResolver;
+import vexpressed.meta.ExpressionType;
+import vexpressed.meta.FunctionDefinition;
+import vexpressed.meta.FunctionParameterDefinition;
+import vexpressed.validation.FunctionTypeResolver;
+
 /**
+ * TODO: REWRITE
  * Function executor delegating function calls to another object. Every registered function
  * remembers the object (delegate) and method. Methods can be registered explicitly with
  * {@link #registerFunction(String, Object, String, Class[])} or object can be scanned for methods
@@ -37,9 +40,7 @@ import java.util.stream.Collectors;
  * function names - that's OK. If some function name "overrides" another one, previously scanned
  * method/function will be overridden and lost.
  */
-public class DelegateFunctionExecutor
-	implements FunctionExecutor, FunctionTypeResolver
-{
+public class FunctionMapper implements FunctionTypeResolver {
 
 	private final Map<String, MethodInfo> methodMap = new HashMap<>();
 
@@ -49,7 +50,7 @@ public class DelegateFunctionExecutor
 	 * object, in which case delegate object is null, but can be used for functions
 	 * implemented by static methods.
 	 */
-	public DelegateFunctionExecutor scanForFunctions(Object delegate) {
+	public FunctionMapper scanForFunctions(Object delegate) {
 		Class delegateClass = delegate.getClass();
 		if (delegate instanceof Class) {
 			delegateClass = (Class) delegate;
@@ -58,7 +59,7 @@ public class DelegateFunctionExecutor
 		return scanForFunctions(delegateClass, delegate);
 	}
 
-	private DelegateFunctionExecutor scanForFunctions(Class delegateClass, Object delegate) {
+	private FunctionMapper scanForFunctions(Class delegateClass, Object delegate) {
 		Method[] methods = delegateClass.getDeclaredMethods();
 		for (Method method : methods) {
 			ExpressionFunction annotation = method.getAnnotation(ExpressionFunction.class);
@@ -79,20 +80,20 @@ public class DelegateFunctionExecutor
 		Object delegate, Method method, ExpressionFunction annotation)
 	{
 		Parameter[] methodParameters = method.getParameters();
-		FunctionParameterDefinition[] paramDefs =
-			new FunctionParameterDefinition[methodParameters.length];
+		ParameterInfo[] paramListInfo =
+			new ParameterInfo[methodParameters.length];
 
-		for (int i = 0; i < paramDefs.length; i++) {
+		for (int i = 0; i < paramListInfo.length; i++) {
 			String[] annotatedNames = annotation != null ? annotation.paramNames() : null;
-			paramDefs[i] = new FunctionParameterDefinition(
+			paramListInfo[i] = new ParameterInfo(
 				annotatedNames != null && annotatedNames.length > i
 					? annotatedNames[i]
 					: methodParameters[i].getName(),
-				ExpressionType.fromClass(methodParameters[i].getType()));
+				methodParameters[i].getType());
 		}
 
 		return new MethodInfo(delegate, method,
-			method.getReturnType(), paramDefs);
+			method.getReturnType(), paramListInfo);
 	}
 
 	/**
@@ -100,7 +101,7 @@ public class DelegateFunctionExecutor
 	 * called with a class object, in which case delegate object is null, but can be used for
 	 * functions implemented by static methods.
 	 */
-	public DelegateFunctionExecutor registerFunction(
+	public FunctionMapper registerFunction(
 		String functionName, Object delegate, String methodName, Class<?>... parameterTypes)
 	{
 		try {
@@ -118,11 +119,12 @@ public class DelegateFunctionExecutor
 		return this;
 	}
 
-	@Override
-	public Object execute(String functionName, List<FunctionArgument> params) {
+	public Object execute(
+		String functionName, List<FunctionArgument> params, VariableResolver variableResolver)
+	{
 		MethodInfo methodInfo = getMethodInfo(functionName);
 
-		Object[] args = prepareArguments(params, methodInfo);
+		Object[] args = prepareArguments(params, methodInfo, variableResolver);
 		try {
 			return methodInfo.method.invoke(methodInfo.object, args);
 		} catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
@@ -141,19 +143,21 @@ public class DelegateFunctionExecutor
 		return methodInfo;
 	}
 
-	private Object[] prepareArguments(List<FunctionArgument> params, MethodInfo methodInfo) {
-		Method method = methodInfo.method;
-		Object[] args = new Object[method.getParameterCount()];
+	private Object[] prepareArguments(
+		List<FunctionArgument> params, MethodInfo methodInfo, VariableResolver variableResolver)
+	{
+		ParameterInfo[] paramsInfo = methodInfo.paramsInfo;
+		Object[] args = new Object[paramsInfo.length];
 		int paramIndex = 0;
-		for (Parameter parameter : method.getParameters()) {
-			String paramName = methodInfo.paramDefinitions[paramIndex].name;
+		for (ParameterInfo parameterInfo : paramsInfo) {
+			Object arg;
+			if (parameterInfo.type == VariableResolver.class) {
+				arg = variableResolver;
+			} else {
+				String paramName = parameterInfo.name;
 
-			Object arg = resolveParam(params, paramName);
-			if (parameter.getType() == BigDecimal.class
-				&& arg != null
-				&& !(arg instanceof BigDecimal))
-			{
-				arg = new BigDecimal(arg.toString());
+				arg = resolveParam(params, paramName);
+				arg = coerceArgument(parameterInfo, arg);
 			}
 			args[paramIndex] = arg;
 			paramIndex += 1;
@@ -161,7 +165,17 @@ public class DelegateFunctionExecutor
 		return args;
 	}
 
-	/** Finds named argument or uses the first unnamed - mutates the params list. */
+	private Object coerceArgument(ParameterInfo parameterInfo, Object arg) {
+		if (parameterInfo.type == BigDecimal.class
+			&& arg != null
+			&& !(arg instanceof BigDecimal))
+		{
+			arg = new BigDecimal(arg.toString());
+		}
+		return arg;
+	}
+
+	/** Finds named argument or uses the first unnamed - <b>mutates the params list</b>. */
 	private Object resolveParam(List<FunctionArgument> params, String name) {
 		for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
 			FunctionArgument param = iterator.next();
@@ -192,9 +206,23 @@ public class DelegateFunctionExecutor
 	public Set<FunctionDefinition> functionInfo() {
 		return methodMap.entrySet().stream()
 			.map(e -> new FunctionDefinition(e.getKey(),
-				e.getValue().returnExpressionType, e.getValue().paramDefinitions))
+				e.getValue().returnExpressionType, e.getValue().parameterDefinitions()))
 			.collect(Collectors.toCollection(() ->
 				new TreeSet<>(Comparator.comparing(fd -> fd.name))));
+	}
+
+	/**
+	 * Creates {@link FunctionExecutor} based on these function definitions (this object)
+	 * with {@link VariableResolver}. This is required way for calling functions that require
+	 * variable resolver parameter.
+	 */
+	public FunctionExecutor executor(VariableResolver variableResolver) {
+		return (name, args) -> execute(name, args, variableResolver);
+	}
+
+	/** Creates {@link FunctionExecutor} based on these function definitions (this object). */
+	public FunctionExecutor executor() {
+		return (name, args) -> execute(name, args, null);
 	}
 
 	private static class MethodInfo {
@@ -203,16 +231,39 @@ public class DelegateFunctionExecutor
 		private final Method method;
 		private final Class returnType;
 		private final ExpressionType returnExpressionType;
-		private final FunctionParameterDefinition[] paramDefinitions;
+		// contains also special params, like variable resolver (which is not function parameter)
+		private final ParameterInfo[] paramsInfo;
 
-		MethodInfo(Object object, Method method,
-			Class returnType, FunctionParameterDefinition[] paramDefinitions)
+		private MethodInfo(Object object, Method method,
+			Class returnType, ParameterInfo[] paramDefinitions)
 		{
 			this.object = object;
 			this.method = method;
 			this.returnType = returnType;
 			returnExpressionType = ExpressionType.fromClass(returnType);
-			this.paramDefinitions = paramDefinitions;
+			this.paramsInfo = paramDefinitions;
+		}
+
+		private FunctionParameterDefinition[] parameterDefinitions() {
+			return Arrays.stream(paramsInfo)
+				.filter(pi -> pi.type != VariableResolver.class)
+				.map(ParameterInfo::createDefinition)
+				.toArray(FunctionParameterDefinition[]::new);
+		}
+	}
+
+	private static class ParameterInfo {
+
+		public final String name;
+		public final Class type;
+
+		private ParameterInfo(String name, Class type) {
+			this.name = name;
+			this.type = type;
+		}
+
+		public FunctionParameterDefinition createDefinition() {
+			return new FunctionParameterDefinition(name, ExpressionType.fromClass(type));
 		}
 	}
 }

@@ -16,7 +16,7 @@ import vexpressed.core.ExpressionException;
 import vexpressed.meta.ExpressionType;
 import vexpressed.VexpressedUtils;
 import vexpressed.validation.ExpressionValidatorVisitor;
-import vexpressed.support.DelegateFunctionExecutor;
+import vexpressed.support.FunctionMapper;
 import vexpressed.validation.FunctionTypeResolver;
 import vexpressed.validation.VariableTypeResolver;
 
@@ -230,7 +230,7 @@ public class ExpressionValidatorTest {
 
 	@Test
 	public void binaryFunctionWithInfixNotationReturnsString() {
-		functionTypeResolver = new DelegateFunctionExecutor()
+		functionTypeResolver = new FunctionMapper()
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class);
 		assertEquals(expr("'a' func 'b'"), STRING);
@@ -238,14 +238,14 @@ public class ExpressionValidatorTest {
 
 	@Test
 	public void randFunctionReturnsDecimal() {
-		functionTypeResolver = new DelegateFunctionExecutor()
+		functionTypeResolver = new FunctionMapper()
 			.scanForFunctions(new TestFunctions());
 		assertEquals(expr("rand(10)"), DECIMAL);
 	}
 
 	@Test
 	public void combinedFunctionsForArithmetic() {
-		functionTypeResolver = new DelegateFunctionExecutor()
+		functionTypeResolver = new FunctionMapper()
 			.scanForFunctions(new TestFunctions())
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class);

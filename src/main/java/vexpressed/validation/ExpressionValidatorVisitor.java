@@ -130,7 +130,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 
 	@Override
 	public ExpressionType visitVariable(VariableContext ctx) {
-		return variableTypeResolver.resolve(ctx.ID().getText());
+		return variableTypeResolver.resolveType(ctx.ID().getText());
 	}
 
 	@Override

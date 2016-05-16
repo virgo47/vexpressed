@@ -2,9 +2,10 @@ package vexprtest;
 
 import java.math.BigDecimal;
 
+import vexpressed.core.VariableResolver;
 import vexpressed.support.ExpressionFunction;
 
-/** @noinspection WeakerAccess*/
+/** @noinspection WeakerAccess */
 public class TestFunctions {
 
 	@ExpressionFunction
@@ -33,5 +34,9 @@ public class TestFunctions {
 	/** @noinspection unused - arg names should work without debug info */
 	public String multiParamFunc(String arg0, String arg1, Integer arg2) {
 		return arg0 + arg1 + arg2;
+	}
+
+	public Integer var_x(VariableResolver variableResolver) {
+		return (Integer) variableResolver.resolve("x");
 	}
 }
