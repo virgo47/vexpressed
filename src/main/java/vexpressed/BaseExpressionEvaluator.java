@@ -21,6 +21,14 @@ import vexpressed.validation.VariableTypeResolver;
  * added with {@link #addFunctionsFrom(Object)} (scanning) or with {@link #addFunction(String,
  * Object, String, Class[])} (explicit function). See {@link FunctionMapper} for more
  * as both methods are delegated to a single internal instance of this executor.
+ *
+ * TODO: Right now there is kind of asymmetry here, because this class knows FunctionMapper
+ * from support, but doesn't need VariableMapper, only VariableResolver. It should either:
+ * - use both and eval would take the target object (holding values) instead of VariableResolver
+ * - use none, eval would take both VariableResolver and FunctionExecutor (this is like enhanced
+ * VexpressedUtils.eval(expr, varesolver, funexecutor), because it caches, etc.)
+ * - split into two classes, one would implement lighter version (with caching, but without
+ * support), and the other class would go to support (PREFERRED)
  */
 public class BaseExpressionEvaluator {
 
