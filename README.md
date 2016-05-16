@@ -20,6 +20,9 @@ Missing but considered for future versions:
 * Operator overloading
 * Method calling
 
+## Core classes structure
+
+![UML Class diagram - core](docs/imgs/core-classes.png)
 
 ## Examples
 
