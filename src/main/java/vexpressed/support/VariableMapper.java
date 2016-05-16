@@ -108,7 +108,8 @@ public class VariableMapper<T> implements VariableTypeResolver {
 		return result;
 	}
 
-	public ExpressionType variableType(String variableName) {
+	@Override
+	public ExpressionType resolveType(String variableName) {
 		ExpressionType expressionType = variableTypes.get(variableName);
 		if (expressionType == null) {
 			for (MapperDelegate delegate : mapperDelegates) {
@@ -130,11 +131,6 @@ public class VariableMapper<T> implements VariableTypeResolver {
 
 	public VariableResolver resolverFor(T object) {
 		return var -> resolveVariable(var, object);
-	}
-
-	@Override
-	public ExpressionType resolveType(String variableName) {
-		return null;
 	}
 
 	private static class MapperDelegate {

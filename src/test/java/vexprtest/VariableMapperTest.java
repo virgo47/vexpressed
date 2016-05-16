@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 import vexpressed.core.UnknownVariable;
 import vexpressed.meta.VariableDefinition;
 import vexpressed.support.VariableMapper;
+import vexpressed.validation.VariableTypeResolver;
 
 public class VariableMapperTest {
 
@@ -116,10 +117,10 @@ public class VariableMapperTest {
 
 	@Test
 	public void variableMapperReturnsVariableType() {
-		VariableMapper<Object> variables = new VariableMapper<>()
+		VariableTypeResolver variables = new VariableMapper<>()
 			.define("x", STRING, o -> null);
 
-		assertThat(variables.variableType("x")).isEqualTo(STRING);
+		assertThat(variables.resolveType("x")).isEqualTo(STRING);
 	}
 
 	@Test
@@ -128,11 +129,11 @@ public class VariableMapperTest {
 			.define("x", STRING, o -> null);
 		VariableMapper<Object> delegate2 = new VariableMapper<>()
 			.define("y", OBJECT, o -> null);
-		VariableMapper<Object> variables = new VariableMapper<>()
+		VariableTypeResolver variables = new VariableMapper<>()
 			.addDelegate(delegate1, o -> o)
 			.addDelegate(delegate2, o -> o);
 
-		assertThat(variables.variableType("x")).isEqualTo(STRING);
-		assertThat(variables.variableType("y")).isEqualTo(OBJECT);
+		assertThat(variables.resolveType("x")).isEqualTo(STRING);
+		assertThat(variables.resolveType("y")).isEqualTo(OBJECT);
 	}
 }
