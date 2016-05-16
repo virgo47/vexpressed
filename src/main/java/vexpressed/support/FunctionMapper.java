@@ -3,7 +3,6 @@ package vexpressed.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -24,11 +23,16 @@ import vexpressed.meta.FunctionParameterDefinition;
 import vexpressed.validation.FunctionTypeResolver;
 
 /**
- * TODO: REWRITE
- * Function executor delegating function calls to another object. Every registered function
- * remembers the object (delegate) and method. Methods can be registered explicitly with
- * {@link #registerFunction(String, Object, String, Class[])} or object can be scanned for methods
+ * Configuration of supported functions which can be implemented as methods on object (non-static)
+ * or on class (static). Functions can be registered one-by-one using very explicit {@link
+ * #registerFunction(String, Object, String, Class[])} (where object parameter can be either
+ * instantiated object or object of type Class) or object/class can be scanned for function methods
  * annotated with {@link ExpressionFunction} using {@link #scanForFunctions(Object)}.
+ * <p>
+ * {@link FunctionExecutor} can be obtained using {@link #executor()} or {@link
+ * #executor(VariableResolver)} - the latter allowing us to work with variables inside the function
+ * method if any method parameter was declared to be of {@link VariableResolver} type (this one is
+ * removed from the list of available function parameters, which is expected behavior).
  * <p>
  * This implementation does NOT allow overloading of parameters - function name is the only
  * identifying element. This means that complex overloaded functions must deal with it inside
@@ -38,7 +42,9 @@ import vexpressed.validation.FunctionTypeResolver;
  * <p>
  * Scanning can find multiple methods with the same name, but these can still have different
  * function names - that's OK. If some function name "overrides" another one, previously scanned
- * method/function will be overridden and lost.
+ * method/function will be overridden and lost. Various functions can even be defined using the
+ * same method (explicitly, scanning does not allow this), although right now there is no
+ * mechanism to know the function name used for the call. (TODO)
  */
 public class FunctionMapper implements FunctionTypeResolver {
 
@@ -69,27 +75,29 @@ public class FunctionMapper implements FunctionTypeResolver {
 					functionName = method.getName();
 				}
 
-				methodMap.put(functionName, createMethodInfo(delegate, method, annotation));
+				methodMap.put(functionName, createMethodInfo(delegate, method));
 			}
 		}
 
 		return this;
 	}
 
-	private MethodInfo createMethodInfo(
-		Object delegate, Method method, ExpressionFunction annotation)
-	{
+	private MethodInfo createMethodInfo(Object delegate, Method method) {
 		Parameter[] methodParameters = method.getParameters();
-		ParameterInfo[] paramListInfo =
-			new ParameterInfo[methodParameters.length];
+		ParameterInfo[] paramListInfo = new ParameterInfo[methodParameters.length];
 
 		for (int i = 0; i < paramListInfo.length; i++) {
-			String[] annotatedNames = annotation != null ? annotation.paramNames() : null;
+			Parameter methodParameter = methodParameters[i];
+			ExpressionParam paramAnnotation = methodParameter.getAnnotation(ExpressionParam.class);
+			String paramName = paramAnnotation != null && !paramAnnotation.name().isEmpty()
+				? paramAnnotation.name()
+				: methodParameter.getName();
+			Object defaultValue =
+				paramAnnotation != null && !paramAnnotation.defaultValue().isEmpty()
+					? paramAnnotation.defaultValue()
+					: null;
 			paramListInfo[i] = new ParameterInfo(
-				annotatedNames != null && annotatedNames.length > i
-					? annotatedNames[i]
-					: methodParameters[i].getName(),
-				methodParameters[i].getType());
+				paramName, methodParameter.getType(), defaultValue);
 		}
 
 		return new MethodInfo(delegate, method,
@@ -111,7 +119,7 @@ public class FunctionMapper implements FunctionTypeResolver {
 				delegate = null;
 			}
 			Method method = delegateClass.getDeclaredMethod(methodName, parameterTypes);
-			methodMap.put(functionName, createMethodInfo(delegate, method, null));
+			methodMap.put(functionName, createMethodInfo(delegate, method));
 		} catch (NoSuchMethodException e) {
 			throw new IllegalArgumentException(
 				"Invalid method specified for function " + functionName, e);
@@ -187,10 +195,12 @@ public class FunctionMapper implements FunctionTypeResolver {
 
 		public final String name;
 		public final Class type;
+		public final Object defaultValue;
 
-		private ParameterInfo(String name, Class type) {
+		private ParameterInfo(String name, Class type, Object defaultValue) {
 			this.name = name;
 			this.type = type;
+			this.defaultValue = defaultValue;
 		}
 
 		public FunctionParameterDefinition createDefinition() {
@@ -232,10 +242,7 @@ public class FunctionMapper implements FunctionTypeResolver {
 				if (parameterInfo.type == VariableResolver.class) {
 					arg = variableResolver;
 				} else {
-					String paramName = parameterInfo.name;
-
-					arg = resolveParam(params, paramName);
-					arg = coerceArgument(parameterInfo, arg);
+					arg = gerArgumentValue(params, parameterInfo);
 				}
 				args[paramIndex] = arg;
 				paramIndex += 1;
@@ -243,21 +250,19 @@ public class FunctionMapper implements FunctionTypeResolver {
 			return args;
 		}
 
-		private Object coerceArgument(ParameterInfo parameterInfo, Object arg) {
-			if (parameterInfo.type == BigDecimal.class
-				&& arg != null
-				&& !(arg instanceof BigDecimal))
-			{
-				arg = new BigDecimal(arg.toString());
-			}
+		private Object gerArgumentValue(
+			List<FunctionArgument> params, ParameterInfo parameterInfo)
+		{
+			Object arg = resolveParam(params, parameterInfo);
+			arg = coerceArgument(parameterInfo, arg);
 			return arg;
 		}
 
 		/** Finds named argument or uses the first unnamed - <b>mutates the params list</b>. */
-		private Object resolveParam(List<FunctionArgument> params, String name) {
+		private Object resolveParam(List<FunctionArgument> params, ParameterInfo parameterInfo) {
 			for (Iterator<FunctionArgument> iterator = params.iterator(); iterator.hasNext(); ) {
 				FunctionArgument param = iterator.next();
-				if (name.equals(param.parameterName)) {
+				if (parameterInfo.name.equals(param.parameterName)) {
 					iterator.remove();
 					return param.value;
 				}
@@ -271,7 +276,12 @@ public class FunctionMapper implements FunctionTypeResolver {
 					return param.value;
 				}
 			}
-			return null;
+			return parameterInfo.defaultValue;
+		}
+
+		/** Converts between similar types, also manages conversion from default value string. */
+		private Object coerceArgument(ParameterInfo parameterInfo, Object arg) {
+			return ExpressionType.fromClass(parameterInfo.type).promote(arg);
 		}
 	}
 }

@@ -7,6 +7,10 @@ import static vexpressed.meta.ExpressionType.INTEGER;
 import static vexpressed.meta.ExpressionType.STRING;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 
 import org.testng.annotations.BeforeMethod;
@@ -101,6 +105,43 @@ public class ExpressionFunctionTest {
 	}
 
 	@Test
+	public void binaryFunctionNormalNotation() {
+		functionExecutor = new FunctionMapper()
+			.registerFunction("func", new TestFunctions(),
+				"binaryFunc", String.class, String.class)
+			.executor();
+		assertEquals(expr("func('a','b')"), "ab");
+	}
+
+	@Test
+	public void annotatedNamesOfParametersAreRecognized() {
+		functionExecutor = new FunctionMapper()
+			.registerFunction("func", new TestFunctions(),
+				"binaryFunc", String.class, String.class)
+			.executor();
+		assertEquals(expr("func(second: 'a', first: 'b')"), "ba");
+	}
+
+	@Test
+	public void defaultValueOfParameterIsUsedIfArgumentIsNotProvided() {
+		functionExecutor = new FunctionMapper()
+			.registerFunction("func", new TestFunctions(),
+				"binaryFunc", String.class, String.class)
+			.executor();
+		assertEquals(expr("func(second: 'a')"), "XXXa");
+	}
+
+	@Test
+	public void unstatedArgumentMeansNull() {
+		functionExecutor = new FunctionMapper()
+			.registerFunction("func", new TestFunctions(),
+				"binaryFunc", String.class, String.class)
+			.executor();
+		assertEquals(expr("func(first: 'a')"), "anull");
+		assertEquals(expr("func('a')"), "anull");
+	}
+
+	@Test
 	public void binaryFunctionWithInfixNotation() {
 		functionExecutor = new FunctionMapper()
 			.registerFunction("func", new TestFunctions(),
@@ -129,6 +170,19 @@ public class ExpressionFunctionTest {
 		FunctionDefinition funcDef1 = functionDefinitions.iterator().next();
 		assertThat(funcDef1.name).isEqualTo("fun_x");
 		assertThat(funcDef1.params).hasSize(0);
+	}
+
+	@Test
+	public void defaultValueConversionsToAllTypesExceptObjectAreSupported() {
+		functionExecutor = new FunctionMapper()
+			.registerFunction("func", new TestFunctions(),
+				"functionWithDefaultsForVariousTypes", String.class,
+				LocalDate.class, LocalDateTime.class, Instant.class,
+				BigDecimal.class, Integer.class, Boolean.class)
+			.executor();
+		//noinspection unchecked
+		Map<String, Object> expr = (Map<String, Object>) expr("func()");
+		assertThat(expr.get("string")).isNull();
 	}
 
 	private Object expr(String expression) {
