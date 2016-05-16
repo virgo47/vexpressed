@@ -50,12 +50,12 @@ public enum ExpressionType {
 			: OBJECT;
 	}
 
-	public static Object promote(Object value, ExpressionType type) {
+	public Object promote(Object value) {
 		if (value == null) {
 			return null;
 		}
 
-		switch (type) {
+		switch (this) {
 			case STRING:
 				return value.toString();
 			case BOOLEAN:
@@ -88,6 +88,6 @@ public enum ExpressionType {
 				return value;
 		}
 		throw new IllegalArgumentException(
-			"Unsupported type " + type + ", cannot convert value " + value);
+			"Unsupported type " + this + ", cannot convert value " + value);
 	}
 }
