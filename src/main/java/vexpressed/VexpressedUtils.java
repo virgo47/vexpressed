@@ -1,12 +1,5 @@
 package vexpressed;
 
-import vexpressed.core.ExpressionCalculatorVisitor;
-import vexpressed.core.ExpressionException;
-import vexpressed.core.FunctionExecutor;
-import vexpressed.core.VariableResolver;
-import vexpressed.grammar.ExprLexer;
-import vexpressed.grammar.ExprParser;
-
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -16,6 +9,16 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import vexpressed.core.ExpressionCalculatorVisitor;
+import vexpressed.core.ExpressionException;
+import vexpressed.core.FunctionExecutor;
+import vexpressed.core.VariableResolver;
+import vexpressed.grammar.ExprLexer;
+import vexpressed.grammar.ExprParser;
+import vexpressed.meta.ExpressionType;
+import vexpressed.validation.ExpressionValidatorVisitor;
+import vexpressed.validation.FunctionTypeResolver;
+import vexpressed.validation.VariableTypeResolver;
 
 public final class VexpressedUtils {
 
@@ -49,6 +52,21 @@ public final class VexpressedUtils {
 		parser.removeErrorListeners();
 		parser.addErrorListener(ERROR_LISTENER);
 		return parser.result();
+	}
+
+	/**
+	 * Checks validity of this expression and returns its {@link ExpressionType} when valid,
+	 * otherwise throws exception. Does not cache parse tree, but for validation this may
+	 * actually be more appropriate behavior as it is expected that many variations of the
+	 * expression will be checked.
+	 */
+	public static ExpressionType check(String expression,
+		VariableTypeResolver variableTypeResolver, FunctionTypeResolver functionTypeResolver)
+	{
+		ParseTree parseTree = createParseTree(expression);
+		ExpressionValidatorVisitor visitor = new ExpressionValidatorVisitor(variableTypeResolver)
+			.withFunctionTypeResolver(functionTypeResolver);
+		return visitor.visit(parseTree);
 	}
 
 	private static class ExceptionThrowingErrorListener extends BaseErrorListener {
