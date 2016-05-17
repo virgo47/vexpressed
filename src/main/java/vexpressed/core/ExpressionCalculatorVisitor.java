@@ -1,9 +1,9 @@
 package vexpressed.core;
 
+import static java.util.stream.Collectors.toCollection;
 import static vexpressed.grammar.ExprParser.ArithmeticOpContext;
 import static vexpressed.grammar.ExprParser.BooleanLiteralContext;
 import static vexpressed.grammar.ExprParser.ComparisonOpContext;
-import static vexpressed.grammar.ExprParser.IsNullContext;
 import static vexpressed.grammar.ExprParser.LogicOpContext;
 import static vexpressed.grammar.ExprParser.NullLiteralContext;
 import static vexpressed.grammar.ExprParser.NumericLiteralContext;
@@ -33,12 +33,12 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 /** Evaluates the expression - resolver for variables is mandatory, for functions optional. */
 public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
@@ -381,10 +381,12 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	@Override
-	public Object visitIsNull(IsNullContext ctx) {
-		Object expr = visit(ctx.expr());
-		TerminalNode not = ctx.K_NOT();
-		return expr == null ^ not != null;
+	public Set visitSet(ExprParser.SetContext ctx) {
+		return ctx.setlist() != null
+			? ctx.setlist().expr().stream()
+			.map(this::visit)
+			.collect(toCollection(LinkedHashSet::new))
+			: Collections.emptySet();
 	}
 
 	@Override

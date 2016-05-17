@@ -3,7 +3,6 @@ package vexpressed.validation;
 import static vexpressed.grammar.ExprParser.ArithmeticOpContext;
 import static vexpressed.grammar.ExprParser.BooleanLiteralContext;
 import static vexpressed.grammar.ExprParser.ComparisonOpContext;
-import static vexpressed.grammar.ExprParser.IsNullContext;
 import static vexpressed.grammar.ExprParser.LogicOpContext;
 import static vexpressed.grammar.ExprParser.NullLiteralContext;
 import static vexpressed.grammar.ExprParser.NumericLiteralContext;
@@ -17,6 +16,7 @@ import static vexpressed.meta.ExpressionType.DATE;
 import static vexpressed.meta.ExpressionType.DATE_TIME;
 import static vexpressed.meta.ExpressionType.DECIMAL;
 import static vexpressed.meta.ExpressionType.INTEGER;
+import static vexpressed.meta.ExpressionType.OBJECT;
 import static vexpressed.meta.ExpressionType.STRING;
 import static vexpressed.meta.ExpressionType.TIMESTAMP;
 
@@ -215,8 +215,8 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 	}
 
 	@Override
-	public ExpressionType visitIsNull(IsNullContext ctx) {
-		return BOOLEAN;
+	public ExpressionType visitSet(ExprParser.SetContext ctx) {
+		return OBJECT;
 	}
 
 	@Override

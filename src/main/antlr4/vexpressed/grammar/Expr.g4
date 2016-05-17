@@ -1,6 +1,5 @@
 /*
-Java/EL-meets-SQL like expression syntax, originally inspired by this grammar:
-https://github.com/antlr/grammars-v4/blob/master/sqlite/SQLite.g4
+Java/Groovy/EL like expression syntax.
 
 Class generation is part of Maven build nothing needs to be done. Following lines
 describe manual generation and are only just for my personal information:
@@ -36,15 +35,17 @@ expr: STRING_LITERAL # stringLiteral
 	| expr op=(OP_ADD | OP_SUB) expr # arithmeticOp
 	| expr ID expr # infixFunction // function made of words (typically) is after arithmetic
 	| expr op=(OP_LT | OP_GT | OP_EQ | OP_NE | OP_LE | OP_GE) expr # comparisonOp
-	| expr K_IS not=K_NOT? K_NULL # isNull
 	| expr op=(OP_AND | OP_OR) expr # logicOp
 	| ID '(' params=paramlist? ')' # function
 	| ID # variable
 	| '(' expr ')' # parens
+	| '[' set=setlist? ']' # set
 	;
 
 paramlist: funarg (',' funarg)*;
 funarg: expr | ID ':' expr;
+
+setlist: expr (',' expr)*;
 
 OP_LT: L T | '<';
 OP_GT: G T | '>';
@@ -60,13 +61,10 @@ OP_MUL: '*';
 OP_DIV: '/';
 OP_MOD: '%';
 
-// if NULL is utilized, it should follow: https://en.wikipedia.org/wiki/Null_%28SQL%29
-K_IS : I S;
-K_NOT : N O T;
 K_NULL : N U L L;
 
-BOOLEAN_LITERAL: T R U E | T
-	| F A L S E | F
+BOOLEAN_LITERAL: T R U E
+	| F A L S E
 	;
 
 // dot is allowed only because syntax does not directly support attribute paths/method calls (yet)

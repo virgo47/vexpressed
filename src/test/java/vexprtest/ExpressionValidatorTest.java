@@ -9,21 +9,13 @@ import static vexpressed.meta.ExpressionType.INTEGER;
 import static vexpressed.meta.ExpressionType.OBJECT;
 import static vexpressed.meta.ExpressionType.STRING;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import vexpressed.core.ExpressionException;
+import vexpressed.support.FunctionMapper;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import vexpressed.core.ExpressionException;
-import vexpressed.meta.ExpressionType;
-import vexpressed.VexpressedUtils;
-import vexpressed.validation.ExpressionValidatorVisitor;
-import vexpressed.support.FunctionMapper;
-import vexpressed.validation.FunctionTypeResolver;
-import vexpressed.validation.VariableTypeResolver;
 
-public class ExpressionValidatorTest {
-
-	private VariableTypeResolver variableTypeResolver;
-	private FunctionTypeResolver functionTypeResolver;
+public class ExpressionValidatorTest extends TestBase {
 
 	@BeforeMethod
 	public void init() {
@@ -34,196 +26,179 @@ public class ExpressionValidatorTest {
 	@Test
 	public void variableTypeIsValidated() {
 		variableTypeResolver = var -> OBJECT;
-		assertEquals(expr("var"), OBJECT);
+		assertEquals(check("var"), OBJECT);
 		variableTypeResolver = var -> STRING;
-		assertEquals(expr("nameIsNotImportant"), STRING);
+		assertEquals(check("nameIsNotImportant"), STRING);
 	}
 
 	@Test
 	public void variableResolverReturnsValueForOneVarName() {
 		variableTypeResolver = var -> var.equals("var") ? STRING : OBJECT;
-		assertEquals(expr("var"), STRING);
-		assertEquals(expr("otherVar"), OBJECT);
-		assertEquals(expr("var != null"), BOOLEAN);
-		assertEquals(expr("var == null"), BOOLEAN);
-		assertEquals(expr("var is null"), BOOLEAN);
-		assertEquals(expr("var is not null"), BOOLEAN);
-	}
-
-	@Test
-	public void isNullComparison() {
-		assertEquals(expr("null is null"), BOOLEAN);
-		assertEquals(expr("null is not null"), BOOLEAN);
-		assertEquals(expr("'' is null"), BOOLEAN);
-		assertEquals(expr("'' is not null"), BOOLEAN);
+		assertEquals(check("var"), STRING);
+		assertEquals(check("otherVar"), OBJECT);
+		assertEquals(check("var != null"), BOOLEAN);
+		assertEquals(check("var == null"), BOOLEAN);
 	}
 
 	@Test
 	public void integerLiteralStaysInteger() {
-		assertEquals(expr("5"), INTEGER);
+		assertEquals(check("5"), INTEGER);
 	}
 
 	@Test
 	public void tooBigIntegerLiteralConvertedToBigDecimal() {
-		assertEquals(expr("5555555555555"), DECIMAL);
+		assertEquals(check("5555555555555"), DECIMAL);
 	}
 
 	@Test
 	public void fpNumberCanStartWithPoint() {
-		assertEquals(expr(".047"), DECIMAL);
+		assertEquals(check(".047"), DECIMAL);
 	}
 
 	@Test
 	public void fpNumberCanContainExponent() {
-		assertEquals(expr("1.47E5"), DECIMAL);
+		assertEquals(check("1.47E5"), DECIMAL);
 	}
 
 	@Test
 	public void fpNumberCanContainExplicitlyPositiveExponent() {
-		assertEquals(expr(".47E+3"), DECIMAL);
+		assertEquals(check(".47E+3"), DECIMAL);
 	}
 
 	@Test
 	public void fpNumberCanContainNegativeExponent() {
-		assertEquals(expr("1.47E-1"), DECIMAL);
+		assertEquals(check("1.47E-1"), DECIMAL);
 	}
 
 	@Test
 	public void fpNumberCanEndWithPoint() {
-		assertEquals(expr("3."), DECIMAL);
+		assertEquals(check("3."), DECIMAL);
 	}
 
 	@Test
 	public void stringConcatenation() {
-		assertEquals(expr("'str' + 'ing'"), STRING);
+		assertEquals(check("'str' + 'ing'"), STRING);
 	}
 
 	@Test
 	public void booleanLiterals() {
-		assertEquals(expr("true"), BOOLEAN);
-		assertEquals(expr("false"), BOOLEAN);
-		assertEquals(expr("T"), BOOLEAN);
-		assertEquals(expr("F"), BOOLEAN);
+		assertEquals(check("true"), BOOLEAN);
+		assertEquals(check("false"), BOOLEAN);
 	}
 
 	@Test
 	public void booleanAnd() {
-		assertEquals(expr("true && true"), BOOLEAN);
-		assertEquals(expr("true && false"), BOOLEAN);
-		assertEquals(expr("false && true"), BOOLEAN);
-		assertEquals(expr("false && false"), BOOLEAN);
-		assertEquals(expr("true AND T"), BOOLEAN);
-		assertEquals(expr("true AND F"), BOOLEAN);
-		// keyword is case-insensitive
-		assertEquals(expr("false and T"), BOOLEAN);
-		assertEquals(expr("false and F"), BOOLEAN);
+		assertEquals(check("true && true"), BOOLEAN);
+		assertEquals(check("true && false"), BOOLEAN);
+		assertEquals(check("false && true"), BOOLEAN);
+		assertEquals(check("false && false"), BOOLEAN);
 	}
 
 	@Test
 	public void booleanOr() {
-		assertEquals(expr("true || true"), BOOLEAN);
-		assertEquals(expr("true || false"), BOOLEAN);
-		assertEquals(expr("false || true"), BOOLEAN);
-		assertEquals(expr("false || false"), BOOLEAN);
-		assertEquals(expr("true OR true"), BOOLEAN);
-		assertEquals(expr("true OR false"), BOOLEAN);
-		assertEquals(expr("false OR true"), BOOLEAN);
-		assertEquals(expr("false OR false"), BOOLEAN);
+		assertEquals(check("true || true"), BOOLEAN);
+		assertEquals(check("true || false"), BOOLEAN);
+		assertEquals(check("false || true"), BOOLEAN);
+		assertEquals(check("false || false"), BOOLEAN);
+		assertEquals(check("true OR true"), BOOLEAN);
+		assertEquals(check("true OR false"), BOOLEAN);
+		assertEquals(check("false OR true"), BOOLEAN);
+		assertEquals(check("false OR false"), BOOLEAN);
 	}
 
 	@Test
 	public void booleanComparison() {
-		assertEquals(expr("true EQ true"), BOOLEAN);
-		assertEquals(expr("true == false"), BOOLEAN);
-		assertEquals(expr("true > false"), BOOLEAN);
-		assertEquals(expr("true >= false"), BOOLEAN);
-		assertEquals(expr("true <= false"), BOOLEAN);
-		assertEquals(expr("true < false"), BOOLEAN);
+		assertEquals(check("true EQ true"), BOOLEAN);
+		assertEquals(check("true == false"), BOOLEAN);
+		assertEquals(check("true > false"), BOOLEAN);
+		assertEquals(check("true >= false"), BOOLEAN);
+		assertEquals(check("true <= false"), BOOLEAN);
+		assertEquals(check("true < false"), BOOLEAN);
 	}
 
 	@Test
 	public void numberComparison() {
-		assertEquals(expr("5 > 1"), BOOLEAN);
-		assertEquals(expr("1 > 5"), BOOLEAN);
-		assertEquals(expr("5 > 5"), BOOLEAN);
-		assertEquals(expr("5 < 1"), BOOLEAN);
-		assertEquals(expr("1 < 5"), BOOLEAN);
-		assertEquals(expr("5 < 5"), BOOLEAN);
-		assertEquals(expr("+5 < -7"), BOOLEAN);
-		assertEquals(expr("-5 < -(3)"), BOOLEAN);
-		assertEquals(expr("5 == 1"), BOOLEAN);
-		assertEquals(expr("5 == 5"), BOOLEAN);
-		assertEquals(expr("5 != 5"), BOOLEAN);
-		assertEquals(expr("5 != 3"), BOOLEAN);
+		assertEquals(check("5 > 1"), BOOLEAN);
+		assertEquals(check("1 > 5"), BOOLEAN);
+		assertEquals(check("5 > 5"), BOOLEAN);
+		assertEquals(check("5 < 1"), BOOLEAN);
+		assertEquals(check("1 < 5"), BOOLEAN);
+		assertEquals(check("5 < 5"), BOOLEAN);
+		assertEquals(check("+5 < -7"), BOOLEAN);
+		assertEquals(check("-5 < -(3)"), BOOLEAN);
+		assertEquals(check("5 == 1"), BOOLEAN);
+		assertEquals(check("5 == 5"), BOOLEAN);
+		assertEquals(check("5 != 5"), BOOLEAN);
+		assertEquals(check("5 != 3"), BOOLEAN);
 		// mixing BigDecimal and Integer on either side
-		assertEquals(expr("5. == 5"), BOOLEAN);
-		assertEquals(expr("5 < 5.1"), BOOLEAN);
+		assertEquals(check("5. == 5"), BOOLEAN);
+		assertEquals(check("5 < 5.1"), BOOLEAN);
 	}
 
 	@Test
 	public void invalidComparisons() {
-		assertThatThrownBy(() -> expr("5 > ''"))
+		assertThatThrownBy(() -> check("5 > ''"))
 			.isInstanceOf(ExpressionException.class)
 			.hasMessage("Invalid comparison/relation operation between type INTEGER and STRING");
-		assertThatThrownBy(() -> expr("1 < true"))
+		assertThatThrownBy(() -> check("1 < true"))
 			.isInstanceOf(ExpressionException.class)
-		.hasMessage("Invalid comparison/relation operation between type INTEGER and BOOLEAN");
+			.hasMessage("Invalid comparison/relation operation between type INTEGER and BOOLEAN");
 	}
 
 	@Test
 	public void unarySign() {
-		assertEquals(expr("-(-5)"), INTEGER);
-		assertThatThrownBy(() -> expr("-'nono'"))
+		assertEquals(check("-(-5)"), INTEGER);
+		assertThatThrownBy(() -> check("-'nono'"))
 			.isInstanceOf(ExpressionException.class);
 	}
 
 	@Test
 	public void nullComparison() {
-		assertEquals(expr("null == null"), BOOLEAN);
-		assertEquals(expr("null != null"), BOOLEAN);
-		assertEquals(expr("5 != null"), BOOLEAN);
-		assertEquals(expr("5 == null"), BOOLEAN);
-		assertEquals(expr("null != 5"), BOOLEAN);
-		assertEquals(expr("null == 5"), BOOLEAN);
-		assertEquals(expr("null > null"), BOOLEAN);
-		assertEquals(expr("null < null"), BOOLEAN);
-		assertEquals(expr("null <= null"), BOOLEAN);
-		assertEquals(expr("null >= null"), BOOLEAN);
+		assertEquals(check("null == null"), BOOLEAN);
+		assertEquals(check("null != null"), BOOLEAN);
+		assertEquals(check("5 != null"), BOOLEAN);
+		assertEquals(check("5 == null"), BOOLEAN);
+		assertEquals(check("null != 5"), BOOLEAN);
+		assertEquals(check("null == 5"), BOOLEAN);
+		assertEquals(check("null > null"), BOOLEAN);
+		assertEquals(check("null < null"), BOOLEAN);
+		assertEquals(check("null <= null"), BOOLEAN);
+		assertEquals(check("null >= null"), BOOLEAN);
 	}
 
 	@Test
 	public void arithmeticOperations() {
-		assertEquals(expr("5. / 2"), DECIMAL);
-		assertEquals(expr("1"), INTEGER);
-		assertEquals(expr("5 + 1"), INTEGER);
+		assertEquals(check("5. / 2"), DECIMAL);
+		assertEquals(check("1"), INTEGER);
+		assertEquals(check("5 + 1"), INTEGER);
 		// any non-integer promotes the whole result to BigDecimal, also notice how scale is set
-		assertEquals(expr("5 + 1."), DECIMAL);
-		assertEquals(expr("5 + 1.0"), DECIMAL);
-		assertEquals(expr("1 - 1.050"), DECIMAL);
-		assertEquals(expr("5 - 6"), INTEGER);
+		assertEquals(check("5 + 1."), DECIMAL);
+		assertEquals(check("5 + 1.0"), DECIMAL);
+		assertEquals(check("1 - 1.050"), DECIMAL);
+		assertEquals(check("5 - 6"), INTEGER);
 		// integer division
-		assertEquals(expr("5 / 2"), INTEGER);
-		assertEquals(expr("5 % 2"), INTEGER);
-		assertThatThrownBy(() -> expr("5 + true"))
+		assertEquals(check("5 / 2"), INTEGER);
+		assertEquals(check("5 % 2"), INTEGER);
+		assertThatThrownBy(() -> check("5 + true"))
 			.isInstanceOf(ExpressionException.class);
-		assertThatThrownBy(() -> expr("true + 5"))
+		assertThatThrownBy(() -> check("true + 5"))
 			.isInstanceOf(ExpressionException.class);
-		assertThatThrownBy(() -> expr("5 + 'str'"))
+		assertThatThrownBy(() -> check("5 + 'str'"))
 			.isInstanceOf(ExpressionException.class);
 	}
 
 	@Test
 	public void arithmeticOnDates() {
 		variableTypeResolver = val -> DATE;
-		assertEquals(expr("val + 1"), DATE);
-		assertEquals(expr("val + '1y'"), DATE);
-		assertEquals(expr("val - 1"), DATE);
-		assertEquals(expr("val - '1d'"), DATE);
+		assertEquals(check("val + 1"), DATE);
+		assertEquals(check("val + '1y'"), DATE);
+		assertEquals(check("val - 1"), DATE);
+		assertEquals(check("val - '1d'"), DATE);
 	}
 
 	@Test
 	public void nullValueForArithmeticThrowsException() {
-		assertThatThrownBy(() -> expr("null + 5"))
+		assertThatThrownBy(() -> check("null + 5"))
 			.isInstanceOf(ExpressionException.class)
 			.hasMessageContaining("Null value not allowed here");
 	}
@@ -233,14 +208,14 @@ public class ExpressionValidatorTest {
 		functionTypeResolver = new FunctionMapper()
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class);
-		assertEquals(expr("'a' func 'b'"), STRING);
+		assertEquals(check("'a' func 'b'"), STRING);
 	}
 
 	@Test
 	public void randFunctionReturnsDecimal() {
 		functionTypeResolver = new FunctionMapper()
 			.scanForFunctions(new TestFunctions());
-		assertEquals(expr("rand(10)"), DECIMAL);
+		assertEquals(check("rand(10)"), DECIMAL);
 	}
 
 	@Test
@@ -249,16 +224,9 @@ public class ExpressionValidatorTest {
 			.scanForFunctions(new TestFunctions())
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class);
-		assertEquals(expr("func('','') + rand(5)"), STRING);
-		assertThatThrownBy(() -> expr("rand(5) + func('','')"))
+		assertEquals(check("func('','') + rand(5)"), STRING);
+		assertThatThrownBy(() -> check("rand(5) + func('','')"))
 			.isInstanceOf(ExpressionException.class)
 			.hasMessage("Arithmetic operation + not supported for types DECIMAL and STRING");
-	}
-
-	private ExpressionType expr(String expression) {
-		ParseTree parseTree = VexpressedUtils.createParseTree(expression);
-		return new ExpressionValidatorVisitor(variableTypeResolver)
-			.withFunctionTypeResolver(functionTypeResolver)
-			.visit(parseTree);
 	}
 }

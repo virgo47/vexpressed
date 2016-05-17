@@ -13,36 +13,24 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import vexpressed.VexpressedUtils;
 import vexpressed.core.FunctionExecutionFailed;
-import vexpressed.core.FunctionExecutor;
 import vexpressed.core.VariableResolver;
 import vexpressed.meta.FunctionDefinition;
 import vexpressed.support.FunctionMapper;
 
-public class ExpressionFunctionTest {
-
-	private VariableResolver variableResolver;
-	private FunctionExecutor functionExecutor;
-
-	@BeforeMethod
-	public void init() {
-		variableResolver = var -> null;
-		functionExecutor = null;
-	}
+public class ExpressionFunctionTest extends TestBase {
 
 	@Test(expectedExceptions = FunctionExecutionFailed.class, expectedExceptionsMessageRegExp =
 		"Cannot execute function func because no function executor was set.")
 	public void functionExecutionWithoutExecutorFails() {
-		expr("func()");
+		eval("func()");
 	}
 
 	@Test
 	public void functionExecutionWithConstantFunction() {
 		functionExecutor = (fname, params) -> 1;
-		assertEquals(expr("func()"), 1);
+		assertEquals(eval("func()"), 1);
 	}
 
 	@Test
@@ -51,7 +39,7 @@ public class ExpressionFunctionTest {
 		testFunctions.invokedFlag = false;
 		functionExecutor = new FunctionMapper().scanForFunctions(testFunctions).executor();
 		// and it can have dot in ID
-		assertEquals(expr("n.op()"), "nop");
+		assertEquals(eval("n.op()"), "nop");
 		assertTrue(testFunctions.invokedFlag);
 	}
 
@@ -59,10 +47,10 @@ public class ExpressionFunctionTest {
 	public void functionCanProduceRandomNumbersAndConvertIntegerArgumentToBigDecimal() {
 		functionExecutor = new FunctionMapper().scanForFunctions(new TestFunctions())
 			.executor();
-		BigDecimal result = (BigDecimal) expr("rand(10)");
+		BigDecimal result = (BigDecimal) eval("rand(10)");
 		assertTrue(result.compareTo(BigDecimal.ZERO) != -1);
 		assertTrue(result.compareTo(BigDecimal.TEN) == -1);
-		assertTrue(result.compareTo((BigDecimal) expr("rand(5)")) != 0); // virtually impossible
+		assertTrue(result.compareTo((BigDecimal) eval("rand(5)")) != 0); // virtually impossible
 	}
 
 	@Test
@@ -71,7 +59,7 @@ public class ExpressionFunctionTest {
 			.registerFunction("reverse", new TestFunctions(),
 				"nonAnnotatedMethod", String.class)
 			.executor();
-		assertEquals(expr("reverse('bomb')"), "bmob");
+		assertEquals(eval("reverse('bomb')"), "bmob");
 	}
 
 	@Test
@@ -80,12 +68,12 @@ public class ExpressionFunctionTest {
 			.registerFunction("func", new TestFunctions(), "multiParamFunc",
 				String.class, String.class, Integer.class)
 			.executor();
-		assertEquals(expr("func()"), "nullnullnull");
-		assertEquals(expr("func('', 'x')"), "xnull");
-		assertEquals(expr("func(NULL, 'x', 5)"), "nullx5");
-		assertEquals(expr("func(arg2:5)"), "nullnull5");
-		assertEquals(expr("func(arg2:5, arg1:'x', 'y')"), "yx5");
-		assertEquals(expr("func('x', arg2:5, 'y')"), "xy5");
+		assertEquals(eval("func()"), "nullnullnull");
+		assertEquals(eval("func('', 'x')"), "xnull");
+		assertEquals(eval("func(NULL, 'x', 5)"), "nullx5");
+		assertEquals(eval("func(arg2:5)"), "nullnull5");
+		assertEquals(eval("func(arg2:5, arg1:'x', 'y')"), "yx5");
+		assertEquals(eval("func('x', arg2:5, 'y')"), "xy5");
 	}
 
 	@Test
@@ -110,7 +98,7 @@ public class ExpressionFunctionTest {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(expr("func('a','b')"), "ab");
+		assertEquals(eval("func('a','b')"), "ab");
 	}
 
 	@Test
@@ -119,7 +107,7 @@ public class ExpressionFunctionTest {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(expr("func(second: 'a', first: 'b')"), "ba");
+		assertEquals(eval("func(second: 'a', first: 'b')"), "ba");
 	}
 
 	@Test
@@ -128,7 +116,7 @@ public class ExpressionFunctionTest {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(expr("func(second: 'a')"), "XXXa");
+		assertEquals(eval("func(second: 'a')"), "XXXa");
 	}
 
 	@Test
@@ -137,8 +125,8 @@ public class ExpressionFunctionTest {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(expr("func(first: 'a')"), "anull");
-		assertEquals(expr("func('a')"), "anull");
+		assertEquals(eval("func(first: 'a')"), "anull");
+		assertEquals(eval("func('a')"), "anull");
 	}
 
 	@Test
@@ -147,7 +135,7 @@ public class ExpressionFunctionTest {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(expr("'a' func 'b'"), "ab");
+		assertEquals(eval("'a' func 'b'"), "ab");
 	}
 
 	@Test
@@ -157,7 +145,7 @@ public class ExpressionFunctionTest {
 			.registerFunction("var_x", new TestFunctions(),
 				"var_x", VariableResolver.class)
 			.executor(variableResolver);
-		assertEquals(expr("var_x() * x"), 25);
+		assertEquals(eval("var_x() * x"), 25);
 	}
 
 	@Test
@@ -181,11 +169,7 @@ public class ExpressionFunctionTest {
 				BigDecimal.class, Integer.class, Boolean.class)
 			.executor();
 		//noinspection unchecked
-		Map<String, Object> expr = (Map<String, Object>) expr("func()");
+		Map<String, Object> expr = (Map<String, Object>) eval("func()");
 		assertThat(expr.get("string")).isNull();
-	}
-
-	private Object expr(String expression) {
-		return VexpressedUtils.eval(expression, variableResolver, functionExecutor);
 	}
 }
