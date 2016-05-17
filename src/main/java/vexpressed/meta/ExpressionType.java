@@ -31,14 +31,16 @@ public enum ExpressionType {
 	public static ExpressionType fromClass(Class klass) {
 		return String.class.isAssignableFrom(klass)
 			? STRING
-			: Boolean.class.isAssignableFrom(klass)
+			: Boolean.class.isAssignableFrom(klass) || klass == boolean.class
 			? BOOLEAN
 			// well-known Java types up to Integer range are considered integer
-			: Integer.class.isAssignableFrom(klass) || Short.class.isAssignableFrom(klass)
-			|| Byte.class.isAssignableFrom(klass)
+			: Integer.class.isAssignableFrom(klass) || klass == int.class
+			|| Short.class.isAssignableFrom(klass) || klass == short.class
+			|| Byte.class.isAssignableFrom(klass) || klass == byte.class
 			? INTEGER
 			// any other number class is decimal type, even for integer numbers
-			: Number.class.isAssignableFrom(klass)
+			: Number.class.isAssignableFrom(klass) || klass == long.class
+			|| klass == double.class || klass == float.class
 			? DECIMAL
 			: LocalDate.class.isAssignableFrom(klass)
 			? DATE
