@@ -30,8 +30,9 @@ expr: STRING_LITERAL # stringLiteral
    	| NUMERIC_LITERAL # numericLiteral
 	| K_NULL # nullLiteral
 	| op=('-' | '+') expr # unarySign
-	| expr CUSTOM_OP expr # customOp // custom op made of symbols is higher than other binary ops
-	| expr op=(OP_MUL | OP_DIV | OP_MOD) expr # arithmeticOp
+	| expr op=CUSTOM_OP expr # customOp // custom op made of symbols is higher than other binary ops
+	| <assoc=right> expr op=OP_POW expr # arithmeticOp
+	| expr op=(OP_MUL | OP_DIV | OP_REMAINDER) expr # arithmeticOp
 	| expr op=(OP_ADD | OP_SUB) expr # arithmeticOp
 	| expr ID expr # infixFunction // function made of words (typically) is after arithmetic
 	| expr op=(OP_LT | OP_GT | OP_EQ | OP_NE | OP_LE | OP_GE) expr # comparisonOp
@@ -59,7 +60,8 @@ OP_ADD: '+';
 OP_SUB: '-';
 OP_MUL: '*';
 OP_DIV: '/';
-OP_MOD: '%';
+OP_REMAINDER: '%'; // reminder, not modulo, e.g. -5 % 3 is -2, not 3
+OP_POW: '^';
 
 K_NULL : N U L L;
 

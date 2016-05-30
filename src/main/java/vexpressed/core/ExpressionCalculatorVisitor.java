@@ -15,10 +15,11 @@ import static vexpressed.grammar.ExprParser.OP_GE;
 import static vexpressed.grammar.ExprParser.OP_GT;
 import static vexpressed.grammar.ExprParser.OP_LE;
 import static vexpressed.grammar.ExprParser.OP_LT;
-import static vexpressed.grammar.ExprParser.OP_MOD;
 import static vexpressed.grammar.ExprParser.OP_MUL;
 import static vexpressed.grammar.ExprParser.OP_NE;
 import static vexpressed.grammar.ExprParser.OP_OR;
+import static vexpressed.grammar.ExprParser.OP_POW;
+import static vexpressed.grammar.ExprParser.OP_REMAINDER;
 import static vexpressed.grammar.ExprParser.OP_SUB;
 import static vexpressed.grammar.ExprParser.ParensContext;
 import static vexpressed.grammar.ExprParser.StringLiteralContext;
@@ -28,6 +29,7 @@ import vexpressed.grammar.ExprBaseVisitor;
 import vexpressed.grammar.ExprParser;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
@@ -179,7 +181,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 		return integerArithmetic(ctx, left.intValue(), right.intValue());
 	}
 
-	private BigDecimal bigDecimalArithmetic(
+	private Number bigDecimalArithmetic(
 		ArithmeticOpContext ctx, BigDecimal left, BigDecimal right)
 	{
 		switch (ctx.op.getType()) {
@@ -191,8 +193,12 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 				return left.multiply(right);
 			case OP_DIV:
 				return left.divide(right, maxScale, roundingMode).stripTrailingZeros();
-			case OP_MOD:
+			case OP_REMAINDER:
 				return left.remainder(right);
+			case OP_POW:
+				return right.scale() > 0
+					? new BigDecimal(Math.pow(left.doubleValue(), right.doubleValue()))
+					: left.pow(right.intValue());
 			default:
 				throw new ExpressionException("Unknown operator " + ctx.op);
 		}
@@ -208,8 +214,10 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 				return left * right;
 			case OP_DIV:
 				return left / right;
-			case OP_MOD:
+			case OP_REMAINDER:
 				return left % right;
+			case OP_POW:
+				return (Number) narrowDownNumberTypes(BigInteger.valueOf(left).pow(right));
 			default:
 				throw new ExpressionException("Unknown operator " + ctx.op);
 		}
@@ -350,7 +358,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 
 	@Override
 	public Object visitCustomOp(ExprParser.CustomOpContext ctx) {
-		String optext = ctx.CUSTOM_OP().getText();
+		String optext = ctx.op.getText();
 		System.out.println("\nOPTEXT = " + optext);
 		return super.visitCustomOp(ctx);
 	}

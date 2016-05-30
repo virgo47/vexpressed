@@ -5,12 +5,12 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import vexpressed.core.ExpressionException;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.testng.annotations.Test;
-import vexpressed.core.ExpressionCalculatorVisitor;
-import vexpressed.core.ExpressionException;
 
 public class ExpressionBasicTest extends TestBase {
 
@@ -177,17 +177,6 @@ public class ExpressionBasicTest extends TestBase {
 	}
 
 	@Test
-	public void unarySign() {
-		assertEquals(eval("-(-5)"), 5);
-		// next case colides with custom operators
-		assertThatThrownBy(() -> eval("--5)"))
-			.isInstanceOf(ExpressionException.class)
-			.hasMessageMatching("(?s)Expression parse failed at 1:0.*'--'.*");
-		assertThatThrownBy(() -> eval("-'nono'"))
-			.isInstanceOf(ExpressionException.class);
-	}
-
-	@Test
 	public void nullComparison() {
 		assertEquals(eval("null == null"), true);
 		assertEquals(eval("null != null"), false);
@@ -199,22 +188,6 @@ public class ExpressionBasicTest extends TestBase {
 		assertEquals(eval("null < null"), false);
 		assertEquals(eval("null <= null"), false);
 		assertEquals(eval("null >= null"), false);
-	}
-
-	@Test
-	public void arithmeticOperations() {
-		assertEquals(eval("5. / 2"), new BigDecimal("2.5"));
-		assertEquals(eval("1"), 1);
-		assertEquals(eval("5 + 1"), 6);
-		// any non-integer promotes the whole result to BigDecimal, also notice how scale is set
-		assertEquals(eval("5 + 1."), new BigDecimal("6"));
-		assertEquals(eval("5 + 1.0"), new BigDecimal("6.0"));
-		assertEquals(eval("1 - 1.050"), new BigDecimal("-0.050"));
-		assertEquals(eval("5 - 6"), -1);
-		// integer division
-		assertEquals(eval("5 / 2"), 2);
-		assertEquals(eval("5 % 2"), 1);
-		// floating point division
 	}
 
 	@Test
@@ -232,14 +205,6 @@ public class ExpressionBasicTest extends TestBase {
 	}
 
 	@Test
-	public void arithmeticScale() {
-		assertEquals(eval("1 / 3"), 0); // integer result
-		assertEquals(((BigDecimal) eval("1 / 3.")).scale(),
-			ExpressionCalculatorVisitor.DEFAULT_MAX_RESULT_SCALE);
-		assertEquals(eval("1 / 4."), new BigDecimal("0.25")); // trailing zeroes are always trimmed
-	}
-
-	@Test
 	public void commentsAreIgnoredProperly() {
 		assertFalse((boolean) eval("true AND false"));
 		assertFalse((boolean) eval("/*true AND*/ false"));
@@ -254,12 +219,5 @@ public class ExpressionBasicTest extends TestBase {
 		assertThatThrownBy(() -> eval("+"))
 			.isInstanceOf(ExpressionException.class)
 			.hasMessageContaining("Expression parse failed at");
-	}
-
-	@Test
-	public void nullValueForArithmeticThrowsException() {
-		assertThatThrownBy(() -> eval("null + 5"))
-			.isInstanceOf(ExpressionException.class)
-			.hasMessageContaining("Null value not allowed here");
 	}
 }

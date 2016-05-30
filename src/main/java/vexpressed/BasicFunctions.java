@@ -46,4 +46,8 @@ public class BasicFunctions {
 		}
 		return (LocalDate) value;
 	}
+
+	public static void main(String[] args) {
+		System.out.println("(5 % 3) = " + (5 % -3));
+	}
 }
