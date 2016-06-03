@@ -35,9 +35,7 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -389,12 +387,12 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	@Override
-	public Set visitSet(ExprParser.SetContext ctx) {
-		return ctx.setlist() != null
-			? ctx.setlist().expr().stream()
+	public Object visitListConstructor(ExprParser.ListConstructorContext ctx) {
+		return ctx.listExpr() != null
+			? ctx.listExpr().expr().stream()
 			.map(this::visit)
-			.collect(toCollection(LinkedHashSet::new))
-			: Collections.emptySet();
+			.collect(toCollection(ArrayList::new))
+			: Collections.emptyList();
 	}
 
 	@Override

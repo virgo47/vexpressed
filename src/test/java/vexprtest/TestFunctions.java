@@ -9,7 +9,7 @@ import java.util.Map;
 
 import vexpressed.core.VariableResolver;
 import vexpressed.support.ExpressionFunction;
-import vexpressed.support.ExpressionParam;
+import vexpressed.support.FunctionParam;
 
 /** @noinspection WeakerAccess, unused */
 public class TestFunctions {
@@ -32,8 +32,8 @@ public class TestFunctions {
 	}
 
 	public String binaryFunc(
-		@ExpressionParam(name = "first", defaultValue = "XXX") String arg0,
-		@ExpressionParam(name = "second") String arg1)
+		@FunctionParam(name = "first", defaultValue = "XXX") String arg0,
+		@FunctionParam(name = "second") String arg1)
 	{
 		return arg0 + arg1;
 	}
@@ -43,13 +43,13 @@ public class TestFunctions {
 	}
 
 	public Map functionWithDefaultsForVariousTypes(
-		@ExpressionParam(defaultValue = "") String string, // still treated as null
-		@ExpressionParam(defaultValue = "2016-09-06") LocalDate date,
-		@ExpressionParam(defaultValue = "2016-09-06 23:24:47") LocalDateTime dateTime, // or with T
-		@ExpressionParam(defaultValue = "2016-09-06T23:24:47Z") Instant instant,
-		@ExpressionParam(defaultValue = "47.3") BigDecimal bigDecimal,
-		@ExpressionParam(defaultValue = "47") Integer integer,
-		@ExpressionParam(defaultValue = "true") Boolean boolObject)
+		@FunctionParam(defaultValue = "") String string, // still treated as null
+		@FunctionParam(defaultValue = "2016-09-06") LocalDate date,
+		@FunctionParam(defaultValue = "2016-09-06 23:24:47") LocalDateTime dateTime, // or with T
+		@FunctionParam(defaultValue = "2016-09-06T23:24:47Z") Instant instant,
+		@FunctionParam(defaultValue = "47.3") BigDecimal bigDecimal,
+		@FunctionParam(defaultValue = "47") Integer integer,
+		@FunctionParam(defaultValue = "true") Boolean boolObject)
 	{
 		Map<String, Object> map = new HashMap<>();
 		map.put("string", string);

@@ -40,13 +40,13 @@ expr: STRING_LITERAL # stringLiteral
 	| ID '(' params=paramlist? ')' # function
 	| ID # variable
 	| '(' expr ')' # parens
-	| '[' set=setlist? ']' # set
+	| '[' list=listExpr? ']' # listConstructor
 	;
 
 paramlist: funarg (',' funarg)*;
 funarg: expr | ID ':' expr;
 
-setlist: expr (',' expr)*;
+listExpr: expr (',' expr)*;
 
 OP_LT: L T | '<';
 OP_GT: G T | '>';

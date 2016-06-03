@@ -88,7 +88,7 @@ public class FunctionMapper implements FunctionTypeResolver {
 
 		for (int i = 0; i < paramListInfo.length; i++) {
 			Parameter methodParameter = methodParameters[i];
-			ExpressionParam paramAnnotation = methodParameter.getAnnotation(ExpressionParam.class);
+			FunctionParam paramAnnotation = methodParameter.getAnnotation(FunctionParam.class);
 			String paramName = paramAnnotation != null && !paramAnnotation.name().isEmpty()
 				? paramAnnotation.name()
 				: methodParameter.getName();

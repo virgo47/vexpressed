@@ -215,7 +215,7 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 	}
 
 	@Override
-	public ExpressionType visitSet(ExprParser.SetContext ctx) {
+	public ExpressionType visitListConstructor(ExprParser.ListConstructorContext ctx) {
 		return OBJECT;
 	}
 

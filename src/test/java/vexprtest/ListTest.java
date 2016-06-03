@@ -3,59 +3,59 @@ package vexprtest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static vexpressed.meta.ExpressionType.OBJECT;
 
-import java.util.Set;
+import java.util.List;
 
 import org.testng.annotations.Test;
 
 /** @noinspection unchecked */
-public class SetTest extends TestBase {
+public class ListTest extends TestBase {
 
 	@Test
-	public void setExpressionTypeIsObject() {
+	public void listExpressionTypeIsObject() {
 		assertThat(check("[]")).isEqualTo(OBJECT);
 		assertThat(check("[1]")).isEqualTo(OBJECT);
 		assertThat(check("[1, 'mixed']")).isEqualTo(OBJECT);
 	}
 
 	@Test
-	public void emptySetExpressionReturnsEmptySet() {
+	public void emptyListExpressionReturnsEmptyList() {
 		Object result = eval("[]");
 		assertThat(result).isNotNull()
-			.isInstanceOf(Set.class);
-		assertThat((Set) result).hasSize(0);
+			.isInstanceOf(List.class);
+		assertThat((List) result).hasSize(0);
 	}
 
 	@Test
-	public void setOfOneExpressionTest() {
+	public void listOfOneExpressionTest() {
 		Object result = eval("[1]");
 		assertThat(result).isNotNull()
-			.isInstanceOf(Set.class);
-		assertThat((Set) result).hasSize(1)
+			.isInstanceOf(List.class);
+		assertThat((List) result).hasSize(1)
 			.containsExactly(1);
 	}
 
 	@Test
-	public void setOfTwoExpressionTest() {
+	public void listOfTwoExpressionTest() {
 		Object result = eval("[1,2]");
 		assertThat(result).isNotNull()
-			.isInstanceOf(Set.class);
-		assertThat((Set) result).hasSize(2)
+			.isInstanceOf(List.class);
+		assertThat((List) result).hasSize(2)
 			.containsExactly(1, 2);
 	}
 
 	@Test
-	public void setOfMorePreservesOrder() {
+	public void listOfMorePreservesOrder() {
 		Object result = eval("[4,1,2]");
 		assertThat(result).isNotNull()
-			.isInstanceOf(Set.class);
-		assertThat((Set) result).containsExactly(4, 1, 2);
+			.isInstanceOf(List.class);
+		assertThat((List) result).containsExactly(4, 1, 2);
 	}
 
 	@Test
-	public void setRemovesDuplicates() {
+	public void listKeepsDuplicates() {
 		Object result = eval("[4,1,2, 1, 4]");
 		assertThat(result).isNotNull()
-			.isInstanceOf(Set.class);
-		assertThat((Set) result).containsExactly(4, 1, 2);
+			.isInstanceOf(List.class);
+		assertThat((List) result).containsExactly(4, 1, 2, 1, 4);
 	}
 }

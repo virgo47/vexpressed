@@ -14,7 +14,7 @@ import vexpressed.meta.ExpressionType;
  */
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ExpressionParam {
+public @interface FunctionParam {
 
 	/** Name of the parameter - if empty, {@link Parameter#getName()} is used. */
 	String name() default "";
