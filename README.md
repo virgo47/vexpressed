@@ -90,8 +90,8 @@ a `Map` you can simply implement it as `var -> map.get(var)`.
 
 ### Functions
 
-Just like with variables, functions are executed by a single very simple abstraction as well,
-`FunctionExecutor` that returns an `Object` (return value) taking function name and actual
+Just like with variables, functions are executed by a single very simple abstraction.
+`FunctionExecutor` returns an `Object` (return value) taking function name and actual
 arguments as input. Let's first implement something dummy - whatever the name of function we use
 we always get the sum of the arguments (assuming they are integers).
 ```
