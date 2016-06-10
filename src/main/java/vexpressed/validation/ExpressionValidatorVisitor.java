@@ -51,6 +51,16 @@ public class ExpressionValidatorVisitor extends ExprBaseVisitor<ExpressionType> 
 	}
 
 	@Override
+	public ExpressionType visitLogicNot(ExprParser.LogicNotContext ctx) {
+		ExpressionType expr = visitNotNull(ctx.expr());
+		if (expr != BOOLEAN) {
+			throw new ExpressionValidationFailed(
+				"Expression for logical NOT must be of type BOOLEAN. Actual type: " + expr);
+		}
+		return BOOLEAN;
+	}
+
+	@Override
 	public ExpressionType visitLogicOp(LogicOpContext ctx) {
 		ExpressionType left = visitNotNull(ctx.expr(0));
 		ExpressionType right = visitNotNull(ctx.expr(1));

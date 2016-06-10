@@ -80,6 +80,11 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	@Override
+	public Object visitLogicNot(ExprParser.LogicNotContext ctx) {
+		return !(boolean) visitNotNull(ctx.expr());
+	}
+
+	@Override
 	public Boolean visitLogicOp(LogicOpContext ctx) {
 		boolean left = (boolean) visitNotNull(ctx.expr(0));
 

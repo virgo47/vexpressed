@@ -30,6 +30,7 @@ expr: STRING_LITERAL # stringLiteral
    	| NUMERIC_LITERAL # numericLiteral
 	| K_NULL # nullLiteral
 	| op=('-' | '+') expr # unarySign
+	| OP_NOT expr # logicNot
 	| expr op=CUSTOM_OP expr # customOp // custom op made of symbols is higher than other binary ops
 	| <assoc=right> expr op=OP_POW expr # arithmeticOp
 	| expr op=(OP_MUL | OP_DIV | OP_REMAINDER) expr # arithmeticOp
@@ -56,6 +57,7 @@ OP_EQ: E Q | '=' '='?;
 OP_NE: N E | N E Q | '!=' | '<>';
 OP_AND: A N D | '&&';
 OP_OR: O R | '||';
+OP_NOT: N O T | '!';
 OP_ADD: '+';
 OP_SUB: '-';
 OP_MUL: '*';

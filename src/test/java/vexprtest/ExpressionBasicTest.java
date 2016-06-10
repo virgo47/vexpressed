@@ -127,6 +127,17 @@ public class ExpressionBasicTest extends TestBase {
 	}
 
 	@Test
+	public void booleanNot() {
+		assertEquals(eval("!true"), false);
+		assertEquals(eval("NOT TRUE"), false);
+		assertEquals(eval("!false"), true);
+		assertEquals(eval("not false"), true);
+		assertEquals(eval("!not true"), true);
+		assertEquals(eval("not! true"), true);
+		assertEquals(eval("! !true"), true);
+	}
+
+	@Test
 	public void booleanAnd() {
 		assertEquals(eval("true && true"), true);
 		// keyword is case-insensitive
