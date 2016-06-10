@@ -133,7 +133,7 @@ public class ExpressionBasicTest extends TestBase {
 		assertEquals(eval("!false"), true);
 		assertEquals(eval("not false"), true);
 		assertEquals(eval("!not true"), true);
-		assertEquals(eval("not! true"), true);
+		assertEquals(eval("not!true"), true);
 		assertEquals(eval("! !true"), true);
 	}
 
