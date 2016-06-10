@@ -37,7 +37,8 @@ expr: STRING_LITERAL # stringLiteral
 	| expr op=(OP_ADD | OP_SUB) expr # arithmeticOp
 	| expr ID expr # infixFunction // function made of words (typically) is after arithmetic
 	| expr op=(OP_LT | OP_GT | OP_EQ | OP_NE | OP_LE | OP_GE) expr # comparisonOp
-	| expr op=(OP_AND | OP_OR) expr # logicOp
+	| expr op=OP_AND expr # logicOp
+	| expr op=OP_OR expr # logicOp
 	| ID '(' params=paramlist? ')' # function
 	| ID # variable
 	| '(' expr ')' # parens

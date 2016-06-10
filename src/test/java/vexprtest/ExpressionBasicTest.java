@@ -10,6 +10,7 @@ import vexpressed.core.ExpressionException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ExpressionBasicTest extends TestBase {
@@ -158,7 +159,29 @@ public class ExpressionBasicTest extends TestBase {
 		assertEquals(eval("false OR false"), false);
 	}
 
-	@Test
+	@DataProvider(name = "test-andor-data")
+	public Object[][] testDataProvider() {
+		return new Object[][] {
+			{false, false, false},
+			{false, false, true},
+			{false, true, false},
+			{false, true, true},
+			{true, false, false},
+			{true, false, true},
+			{true, true, false},
+			{true, true, true},
+		};
+	}
+
+	@Test(dataProvider = "test-andor-data")
+	public void booleanAndOrCombination(boolean x, boolean y, boolean z) {
+		assertEquals(eval(x + " || " + y + " && " + z),
+			eval(x + " || (" + y + " && " + z + ')'));
+		assertEquals(eval(x + " && " + y + " || " + z),
+			eval("(" + x + " && " + y + ") || " + z));
+	}
+
+		@Test
 	public void booleanComparison() {
 		assertEquals(eval("true EQ true"), true);
 		assertEquals(eval("true == false"), false);
