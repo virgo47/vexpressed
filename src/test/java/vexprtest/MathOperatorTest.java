@@ -50,6 +50,15 @@ public class MathOperatorTest extends TestBase {
 				.multiply(new BigDecimal(Integer.MAX_VALUE)));
 		assertThat(eval("0 - " + Integer.MIN_VALUE))
 			.isEqualTo(new BigDecimal(((long) Integer.MAX_VALUE) + 1));
+
+		// after overflow the same expression may change behaviour
+		variableResolver = var -> 2000;
+		assertThat(eval("(a+a)/(a+1)")).isEqualTo(1);
+		assertThat(eval("(a+a)%(a+1)")).isEqualTo(1999);
+		// overflow lets decimal math kick in
+		variableResolver = var -> 2_000_000_000;
+		assertThat(eval("(a+a)/(a+1)")).isEqualTo(new BigDecimal("2.000000")); // small precision
+		assertThat(eval("(a+a)%(a+1)")).isEqualTo(new BigDecimal("1999999999"));
 	}
 
 	@Test
