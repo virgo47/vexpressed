@@ -207,23 +207,28 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 		}
 	}
 
-	private Number integerArithmetic(ArithmeticOpContext ctx, int left, int right) {
+	/** Left side is made long to prevent overflows. */
+	private Number integerArithmetic(ArithmeticOpContext ctx, long left, int right) {
 		switch (ctx.op.getType()) {
 			case OP_ADD:
-				return left + right;
+				return narrowIntegerResult(left + right);
 			case OP_SUB:
-				return left - right;
+				return narrowIntegerResult(left - right);
 			case OP_MUL:
-				return left * right;
+				return narrowIntegerResult(left * right);
 			case OP_DIV:
-				return left / right;
+				return narrowIntegerResult(left / right);
 			case OP_REMAINDER:
-				return left % right;
+				return narrowIntegerResult(left % right);
 			case OP_POW:
-				return (Number) narrowDownNumberTypes(BigInteger.valueOf(left).pow(right));
+				return narrowIntegerResult(BigInteger.valueOf(left).pow(right));
 			default:
 				throw new ExpressionException("Unknown operator " + ctx.op);
 		}
+	}
+
+	private Number narrowIntegerResult(Number result) {
+		return (Number) narrowDownNumberTypes(result);
 	}
 
 	@Override
@@ -286,7 +291,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	@Override
 	public Number visitNumericLiteral(NumericLiteralContext ctx) {
 		String text = ctx.NUMERIC_LITERAL().getText();
-		return stringToNumber(text);
+		return stringToNumber(text.replaceAll("_", ""));
 	}
 
 	private Number stringToNumber(String text) {

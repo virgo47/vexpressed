@@ -93,6 +93,16 @@ public class ExpressionBasicTest extends TestBase {
 	}
 
 	@Test
+	public void numbersCanContainUnderscores() {
+		assertEquals(eval("5_0"), 50);
+		assertEquals(eval("5_"), 5);
+		assertEquals(eval("5_.1_"), new BigDecimal("5.1"));
+		assertEquals(eval("5_.1_E1_"), new BigDecimal("51"));
+		// note that _5 is valid variable name, so is _5.5 (dot is part of valid ID)
+		// _5E+1 would resolve _5E variable and add it to 1
+	}
+
+	@Test
 	public void booleanVariableStaysBoolean() {
 		variableResolver = var -> true;
 		assertEquals(eval("var"), true);
@@ -181,7 +191,7 @@ public class ExpressionBasicTest extends TestBase {
 			eval("(" + x + " && " + y + ") || " + z));
 	}
 
-		@Test
+	@Test
 	public void booleanComparison() {
 		assertEquals(eval("true EQ true"), true);
 		assertEquals(eval("true == false"), false);

@@ -75,9 +75,11 @@ BOOLEAN_LITERAL: T R U E
 // dot is allowed only because syntax does not directly support attribute paths/method calls (yet)
 ID: [a-zA-Z$_][a-zA-Z0-9$_.]*;
 
-NUMERIC_LITERAL : DIGIT+ ( '.' DIGIT* )? ( E [-+]? DIGIT+ )?
-	| '.' DIGIT+ ( E [-+]? DIGIT+ )?
+NUMERIC_LITERAL: DIGITS ( '.' (DIGITS)? )? ( E [-+]? DIGITS )?
+	| '.' DIGITS ( E [-+]? DIGITS )?
 	;
+
+DIGITS: [0-9][0-9_]*;
 
 STRING_LITERAL : '\'' ( ~'\'' | '\'\'' )* '\'';
 
@@ -91,8 +93,6 @@ LINE_COMMENT : '//' ~[\r\n]* -> skip ;
 CUSTOM_OP: [#+*/<>=!|.;:?~_@$%^&-]+;
 
 UNEXPECTED_CHAR : . ;
-
-fragment DIGIT : [0-9];
 
 fragment A : [aA];
 fragment B : [bB];

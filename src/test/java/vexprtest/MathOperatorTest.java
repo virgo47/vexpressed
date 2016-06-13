@@ -1,5 +1,6 @@
 package vexprtest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.testng.Assert.assertEquals;
 
@@ -36,7 +37,19 @@ public class MathOperatorTest extends TestBase {
 		// integer division
 		assertEquals(eval("5 / 2"), 2);
 		assertEquals(eval("5 % 2"), 1);
+		assertEquals(eval("5. % 2"), BigDecimal.ONE);
+		assertEquals(eval("5.1 % 2.6"), new BigDecimal("2.5"));
 		// floating point division
+	}
+
+	@Test
+	public void integerOverflowReturnsBigDecimal() {
+		assertThat(eval("2_000_000_000 + 2_000_000_000")).isEqualTo(new BigDecimal(4_000_000_000L));
+		assertThat(eval(Integer.MAX_VALUE + " * " + Integer.MAX_VALUE))
+			.isEqualTo(new BigDecimal(Integer.MAX_VALUE)
+				.multiply(new BigDecimal(Integer.MAX_VALUE)));
+		assertThat(eval("0 - " + Integer.MIN_VALUE))
+			.isEqualTo(new BigDecimal(((long) Integer.MAX_VALUE) + 1));
 	}
 
 	@Test
