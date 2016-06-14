@@ -1,14 +1,5 @@
 package vexpressed;
 
-import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import vexpressed.core.ExpressionCalculatorVisitor;
 import vexpressed.core.ExpressionException;
 import vexpressed.core.FunctionExecutor;
@@ -19,6 +10,16 @@ import vexpressed.meta.ExpressionType;
 import vexpressed.validation.ExpressionValidatorVisitor;
 import vexpressed.validation.FunctionTypeResolver;
 import vexpressed.validation.VariableTypeResolver;
+
+import org.antlr.v4.runtime.ANTLRErrorListener;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 public final class VexpressedUtils {
 
