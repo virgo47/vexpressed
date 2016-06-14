@@ -1,12 +1,12 @@
 package vexpressed.support;
 
+import vexpressed.meta.ExpressionType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
-
-import vexpressed.meta.ExpressionType;
 
 /**
  * Annotates the method parameter - without parameters it is not necessary, as any method
