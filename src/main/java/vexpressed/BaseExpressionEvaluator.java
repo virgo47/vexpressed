@@ -1,11 +1,5 @@
 package vexpressed;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import vexpressed.core.ExpressionCalculatorVisitor;
 import vexpressed.core.VariableResolver;
 import vexpressed.meta.ExpressionType;
@@ -14,6 +8,12 @@ import vexpressed.support.FunctionMapper;
 import vexpressed.validation.ExpressionValidatorVisitor;
 import vexpressed.validation.VariableTypeResolver;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import org.antlr.v4.runtime.tree.ParseTree;
+
 /**
  * Default/base expression evaluator with caching, including {@link BasicFunctions}.
  * Whenever repeated expression evaluation is expected with the same set of functions
@@ -21,7 +21,7 @@ import vexpressed.validation.VariableTypeResolver;
  * added with {@link #addFunctionsFrom(Object)} (scanning) or with {@link #addFunction(String,
  * Object, String, Class[])} (explicit function). See {@link FunctionMapper} for more
  * as both methods are delegated to a single internal instance of this executor.
- *
+ * <p>
  * TODO: Right now there is kind of asymmetry here, because this class knows FunctionMapper
  * from support, but doesn't need VariableMapper, only VariableResolver. It should either:
  * - use both and eval would take the target object (holding values) instead of VariableResolver
@@ -86,9 +86,14 @@ public class BaseExpressionEvaluator {
 	 */
 	public Object eval(String expression, VariableResolver variableResolver) {
 		ParseTree parseTree = expressionParseTree(expression);
-		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
+		ExpressionCalculatorVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
 			.withFunctionExecutor(functionMapper.executor(variableResolver));
+		adjustCalculatorVisitor(visitor);
 		return visitor.visit(parseTree);
+	}
+
+	public void adjustCalculatorVisitor(ExpressionCalculatorVisitor expressionCalculatorVisitor) {
+		// nothing by default, can be overridden
 	}
 
 	/** Like {@link #eval(String, VariableResolver)} but casts the result to boolean. */
