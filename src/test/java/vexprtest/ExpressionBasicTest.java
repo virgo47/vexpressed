@@ -224,6 +224,30 @@ public class ExpressionBasicTest extends TestBase {
 	}
 
 	@Test
+	public void dateComparison() {
+		variableResolver = val -> val.equals("a")
+			? LocalDate.of(2016, 2, 29) : LocalDate.of(2016, 3, 1);
+		assertEquals(eval("a > b"), false);
+		assertEquals(eval("a >= b"), false);
+		assertEquals(eval("a < b"), true);
+		assertEquals(eval("a <= b"), true);
+		assertEquals(eval("a == b"), false);
+		assertEquals(eval("a != b"), true);
+		assertEquals(eval("a == a"), true);
+		assertEquals(eval("a != a"), false);
+		assertEquals(eval("a >= a"), true);
+		assertEquals(eval("a <= a"), true);
+		assertEquals(eval("a < a"), false);
+		assertEquals(eval("a > a"), false);
+
+		// mixing types is not supported
+		variableResolver = val -> val.equals("a")
+			? LocalDate.of(2016, 3, 1) : LocalDateTime.of(2016, 3, 1, 12, 47);
+		assertThatThrownBy(() -> eval("a > b"))
+			.isInstanceOf(ClassCastException.class);
+	}
+
+	@Test
 	public void nullComparison() {
 		assertEquals(eval("null == null"), true);
 		assertEquals(eval("null != null"), false);

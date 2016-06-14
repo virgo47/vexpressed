@@ -58,7 +58,7 @@ public class BasicFunctions {
 	}
 
 	@ExpressionFunction
-	public static BigDecimal asBigDecimal(@FunctionParam(name = "value") Object value) {
+	public static BigDecimal asDecimal(@FunctionParam(name = "value") Object value) {
 		if (value instanceof BigDecimal) {
 			return (BigDecimal) value;
 		}
@@ -66,12 +66,31 @@ public class BasicFunctions {
 		return new BigDecimal(value.toString());
 	}
 
+	// TODO write tests for these
 	@ExpressionFunction
-	public static LocalDate asLocalDate(@FunctionParam(name = "value") Object value) {
+	public static LocalDate asDate(@FunctionParam(name = "value") Object value) {
 		if (value instanceof LocalDate) {
 			return (LocalDate) value;
 		}
 
 		return LocalDate.parse(value.toString());
+	}
+
+	@ExpressionFunction
+	public static LocalDateTime asDateTime(@FunctionParam(name = "value") Object value) {
+		if (value instanceof LocalDateTime) {
+			return (LocalDateTime) value;
+		}
+
+		return LocalDateTime.parse(value.toString());
+	}
+
+	@ExpressionFunction
+	public static Instant asTimestamp(@FunctionParam(name = "value") Object value) {
+		if (value instanceof Instant) {
+			return (Instant) value;
+		}
+
+		return Instant.parse(value.toString());
 	}
 }
