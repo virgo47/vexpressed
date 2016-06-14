@@ -8,7 +8,10 @@ import static org.testng.Assert.assertTrue;
 import vexpressed.core.ExpressionException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -239,13 +242,27 @@ public class ExpressionBasicTest extends TestBase {
 		variableResolver = val -> LocalDate.of(2016, 2, 29);
 		assertEquals(eval("val + 1"), LocalDate.of(2016, 3, 1));
 		assertEquals(eval("val + '1d'"), LocalDate.of(2016, 3, 1));
+		assertEquals(eval("val + '1w'"), LocalDate.of(2016, 3, 7));
 		assertEquals(eval("val + '1m'"), LocalDate.of(2016, 3, 29));
 		assertEquals(eval("val + '1y'"), LocalDate.of(2017, 2, 28));
 		variableResolver = val -> LocalDate.of(2016, 3, 1);
 		assertEquals(eval("val - 1"), LocalDate.of(2016, 2, 29));
 		assertEquals(eval("val - '1d'"), LocalDate.of(2016, 2, 29));
+		assertEquals(eval("val - '1w'"), LocalDate.of(2016, 2, 23));
 		assertEquals(eval("val - '1m'"), LocalDate.of(2016, 2, 1));
 		assertEquals(eval("val - '1y'"), LocalDate.of(2015, 3, 1));
+
+		// combined specification is not supported directly
+		assertThatThrownBy(() -> eval("val + '2w3d'"))
+			.isInstanceOf(ExpressionException.class)
+			.hasMessage("Cannot parse temporal amount: 2w3d");
+		// only split to more strings
+		assertEquals(eval("val + '2w' + '3d'"), LocalDate.of(2016, 3, 18));
+
+		variableResolver = val -> LocalDateTime.of(2016, 3, 1, 12, 47);
+		assertEquals(eval("val + 1"), LocalDateTime.of(2016, 3, 2, 12, 47));
+		variableResolver = val -> Instant.ofEpochMilli(1000000);
+		assertEquals(eval("val + 1"), Instant.ofEpochMilli(1000000 + TimeUnit.DAYS.toMillis(1)));
 	}
 
 	@Test
