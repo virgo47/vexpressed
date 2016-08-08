@@ -66,7 +66,7 @@ OP_DIV: '/';
 OP_REMAINDER: '%'; // reminder, not modulo, e.g. -5 % 3 is -2, not 3
 OP_POW: '^';
 
-K_NULL : N U L L;
+K_NULL: N U L L;
 
 BOOLEAN_LITERAL: T R U E
 	| F A L S E
@@ -81,42 +81,42 @@ NUMERIC_LITERAL: DIGITS ( '.' (DIGITS)? )? ( E [-+]? DIGITS )?
 
 DIGITS: [0-9][0-9_]*;
 
-STRING_LITERAL : '\'' ( ~'\'' | '\'\'' )* '\'';
+STRING_LITERAL: '\'' ( ~'\'' | '\'\'' )* '\'';
 
-SPACES : [ \u000B\t\r\n] -> channel(HIDDEN) ;
+SPACES: [ \u000B\t\r\n] -> channel(HIDDEN) ;
 
-COMMENT : '/*' .*? '*/' -> skip ;
+COMMENT: '/*' .*? '*/' -> skip ;
 
-LINE_COMMENT : '//' ~[\r\n]* -> skip ;
+LINE_COMMENT: '//' ~[\r\n]* -> skip ;
 
 // after line comment and comment and similar things not to overshadow them
 CUSTOM_OP: [#+*/<>=!|.;:?~_@$%^&-]+;
 
-UNEXPECTED_CHAR : . ;
+UNEXPECTED_CHAR: . ;
 
-fragment A : [aA];
-fragment B : [bB];
-fragment C : [cC];
-fragment D : [dD];
-fragment E : [eE];
-fragment F : [fF];
-fragment G : [gG];
-fragment H : [hH];
-fragment I : [iI];
-fragment J : [jJ];
-fragment K : [kK];
-fragment L : [lL];
-fragment M : [mM];
-fragment N : [nN];
-fragment O : [oO];
-fragment P : [pP];
-fragment Q : [qQ];
-fragment R : [rR];
-fragment S : [sS];
-fragment T : [tT];
-fragment U : [uU];
-fragment V : [vV];
-fragment W : [wW];
-fragment X : [xX];
-fragment Y : [yY];
-fragment Z : [zZ];
+fragment A: [aA];
+fragment B: [bB];
+fragment C: [cC];
+fragment D: [dD];
+fragment E: [eE];
+fragment F: [fF];
+fragment G: [gG];
+fragment H: [hH];
+fragment I: [iI];
+fragment J: [jJ];
+fragment K: [kK];
+fragment L: [lL];
+fragment M: [mM];
+fragment N: [nN];
+fragment O: [oO];
+fragment P: [pP];
+fragment Q: [qQ];
+fragment R: [rR];
+fragment S: [sS];
+fragment T: [tT];
+fragment U: [uU];
+fragment V: [vV];
+fragment W: [wW];
+fragment X: [xX];
+fragment Y: [yY];
+fragment Z: [zZ];
