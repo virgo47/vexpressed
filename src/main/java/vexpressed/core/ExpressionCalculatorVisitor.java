@@ -129,8 +129,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 			Matcher matcher = TEMPORAL_AMOUNT_PATTERN.matcher(((String) right).toLowerCase());
 			if (matcher.matches()) {
 				amount = Long.parseLong(matcher.group(1));
-				String unitGroup = matcher.group(2);
-				unit = parseUnit(unitGroup);
+				unit = parseUnit(matcher.group(2));
 			} else {
 				throw new ExpressionException("Cannot parse temporal amount: " + right);
 			}
