@@ -31,14 +31,14 @@ expr: STRING_LITERAL # stringLiteral
 	| K_NULL # nullLiteral
 	| op=('-' | '+') expr # unarySign
 	| OP_NOT expr # logicNot
-	| expr op=CUSTOM_OP expr # customOp // custom op made of symbols is higher than other binary ops
-	| <assoc=right> expr op=OP_POW expr # arithmeticOp
-	| expr op=(OP_MUL | OP_DIV | OP_REMAINDER) expr # arithmeticOp
-	| expr op=(OP_ADD | OP_SUB) expr # arithmeticOp
-	| expr ID expr # infixFunction // function made of words (typically) is after arithmetic
-	| expr op=(OP_LT | OP_GT | OP_EQ | OP_NE | OP_LE | OP_GE) expr # comparisonOp
-	| expr op=OP_AND expr # logicOp
-	| expr op=OP_OR expr # logicOp
+	| left=expr op=CUSTOM_OP right=expr # customOp // custom op made of symbols is higher than other binary ops
+	| <assoc=right> left=expr op=OP_POW right=expr # arithmeticOp
+	| left=expr op=(OP_MUL | OP_DIV | OP_REMAINDER) right=expr # arithmeticOp
+	| left=expr op=(OP_ADD | OP_SUB) right=expr # arithmeticOp
+	| left=expr ID right=expr # infixFunction // function made of words (typically) is after arithmetic
+	| left=expr op=(OP_LT | OP_GT | OP_EQ | OP_NE | OP_LE | OP_GE) right=expr # comparisonOp
+	| left=expr op=OP_AND right=expr # logicOp
+	| left=expr op=OP_OR right=expr # logicOp
 	| ID '(' params=paramlist? ')' # function
 	| ID # variable
 	| '(' expr ')' # parens

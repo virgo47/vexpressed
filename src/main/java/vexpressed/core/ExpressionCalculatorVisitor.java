@@ -87,7 +87,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 
 	@Override
 	public Boolean visitLogicOp(LogicOpContext ctx) {
-		boolean left = (boolean) visitNotNull(ctx.expr(0));
+		boolean left = (boolean) visitNotNull(ctx.left);
 
 		switch (ctx.op.getType()) {
 			case OP_AND:
@@ -100,12 +100,12 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	private boolean booleanRightSide(LogicOpContext ctx) {
-		return (boolean) visitNotNull(ctx.expr(1));
+		return (boolean) visitNotNull(ctx.right);
 	}
 
 	@Override
 	public Object visitArithmeticOp(ArithmeticOpContext ctx) {
-		Object left = visitNotNull(ctx.expr(0));
+		Object left = visitNotNull(ctx.left);
 		if (left instanceof Temporal) {
 			return temporalArithmetic(ctx, (Temporal) left);
 		} else if (left instanceof String) {
@@ -118,7 +118,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	private static final Pattern TEMPORAL_AMOUNT_PATTERN = Pattern.compile("(\\d+)([ymwd])?");
 
 	private Object temporalArithmetic(ArithmeticOpContext ctx, Temporal left) {
-		Object right = visitNotNull(ctx.expr(1));
+		Object right = visitNotNull(ctx.right);
 		long amount;
 		TemporalUnit unit;
 
@@ -148,7 +148,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	private Object stringArithmetic(ArithmeticOpContext ctx, String left) {
-		Object right = visitNotNull(ctx.expr(1));
+		Object right = visitNotNull(ctx.right);
 
 		switch (ctx.op.getType()) {
 			case OP_ADD:
@@ -174,7 +174,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	private Object numberArithmetic(ArithmeticOpContext ctx, Number left) {
-		Number right = (Number) visitNotNull(ctx.expr(1));
+		Number right = (Number) visitNotNull(ctx.right);
 		if (left instanceof BigDecimal && right instanceof BigDecimal) {
 			return bigDecimalArithmetic(ctx, (BigDecimal) left, (BigDecimal) right);
 		} else if (left instanceof BigDecimal) {
@@ -234,8 +234,8 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 
 	@Override
 	public Boolean visitComparisonOp(ComparisonOpContext ctx) {
-		Comparable left = (Comparable) visit(ctx.expr(0));
-		Comparable right = (Comparable) visit(ctx.expr(1));
+		Comparable left = (Comparable) visit(ctx.left);
+		Comparable right = (Comparable) visit(ctx.right);
 		int operator = ctx.op.getType();
 		if (left == null || right == null) {
 			// TODO do we want to throw when operator is not EQ/NE?
@@ -360,8 +360,8 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 		String functionName = ctx.ID().getText();
 
 		return executeFunction(functionName, Arrays.asList(
-			new FunctionArgument(visit(ctx.expr(0))),
-			new FunctionArgument(visit(ctx.expr(1)))));
+			new FunctionArgument(visit(ctx.left)),
+			new FunctionArgument(visit(ctx.right))));
 	}
 
 	@Override
