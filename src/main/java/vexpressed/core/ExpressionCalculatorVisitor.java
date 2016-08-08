@@ -34,6 +34,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -200,7 +201,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 				return left.remainder(right);
 			case OP_POW:
 				return right.scale() > 0
-					? new BigDecimal(Math.pow(left.doubleValue(), right.doubleValue()))
+					? BigDecimal.valueOf(Math.pow(left.doubleValue(), right.doubleValue()))
 					: left.pow(right.intValue());
 			default:
 				throw new ExpressionException("Unknown operator " + ctx.op);
@@ -357,11 +358,10 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	@Override
 	public Object visitInfixFunction(ExprParser.InfixFunctionContext ctx) {
 		String functionName = ctx.ID().getText();
-		List<FunctionArgument> args = new ArrayList<>();
-		args.add(new FunctionArgument(null, visit(ctx.expr(0))));
-		args.add(new FunctionArgument(null, visit(ctx.expr(1))));
 
-		return executeFunction(functionName, args);
+		return executeFunction(functionName, Arrays.asList(
+			new FunctionArgument(visit(ctx.expr(0))),
+			new FunctionArgument(visit(ctx.expr(1)))));
 	}
 
 	@Override

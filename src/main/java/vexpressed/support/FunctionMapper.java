@@ -12,6 +12,7 @@ import vexpressed.validation.FunctionTypeResolver;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
  * function names - that's OK. If some function name "overrides" another one, previously scanned
  * method/function will be overridden and lost. Various functions can even be defined using the
  * same method (explicitly, scanning does not allow this), although right now there is no
- * mechanism to know the function name used for the call. (TODO)
+ * mechanism to know the function name used for the call.
  */
 public class FunctionMapper implements FunctionTypeResolver {
 
@@ -168,7 +169,6 @@ public class FunctionMapper implements FunctionTypeResolver {
 
 		private final Object object;
 		private final Method method;
-		private final Class returnType;
 		private final ExpressionType returnExpressionType;
 		// contains also special params, like variable resolver (which is not function parameter)
 		private final ParameterInfo[] paramsInfo;
@@ -178,7 +178,6 @@ public class FunctionMapper implements FunctionTypeResolver {
 		{
 			this.object = object;
 			this.method = method;
-			this.returnType = returnType;
 			returnExpressionType = ExpressionType.fromClass(returnType);
 			this.paramsInfo = paramDefinitions;
 		}
@@ -234,6 +233,7 @@ public class FunctionMapper implements FunctionTypeResolver {
 		private Object[] prepareArguments(
 			List<FunctionArgument> params, MethodInfo methodInfo, VariableResolver variableResolver)
 		{
+			List<FunctionArgument> unresolvedParams = new ArrayList<>(params);
 			ParameterInfo[] paramsInfo = methodInfo.paramsInfo;
 			Object[] args = new Object[paramsInfo.length];
 			int paramIndex = 0;
@@ -242,7 +242,7 @@ public class FunctionMapper implements FunctionTypeResolver {
 				if (parameterInfo.type == VariableResolver.class) {
 					arg = variableResolver;
 				} else {
-					arg = gerArgumentValue(params, parameterInfo);
+					arg = getArgumentValue(unresolvedParams, parameterInfo);
 				}
 				args[paramIndex] = arg;
 				paramIndex += 1;
@@ -250,7 +250,7 @@ public class FunctionMapper implements FunctionTypeResolver {
 			return args;
 		}
 
-		private Object gerArgumentValue(
+		private Object getArgumentValue(
 			List<FunctionArgument> params, ParameterInfo parameterInfo)
 		{
 			Object arg = resolveParam(params, parameterInfo);

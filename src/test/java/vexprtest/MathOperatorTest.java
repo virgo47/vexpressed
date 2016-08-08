@@ -77,7 +77,7 @@ public class MathOperatorTest extends TestBase {
 		assertEquals(eval("10^10"), new BigDecimal("10000000000"));
 
 		// any decimal pow on either side results in decimal (even if result is integer)
-		assertEquals(eval("4^0.5"), new BigDecimal("2"));
+		assertEquals(eval("4^0.5"), new BigDecimal("2.0"));
 		assertEquals(eval("0.5^2"), new BigDecimal("0.25"));
 
 		// right associativity test - this is 2^8=256, not 4^3=64
