@@ -7,6 +7,7 @@ import static org.testng.Assert.assertEquals;
 import vexpressed.BaseExpressionEvaluator;
 import vexpressed.core.FunctionExecutionFailed;
 import vexpressed.core.VariableResolver;
+import vexpressed.support.VariableBinding;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -31,10 +32,10 @@ public class BaseExpressionEvaluatorTest {
 	@Test(dataProvider = "test-contains-data")
 	public void testContainsFunction(String needle, boolean expectedResult) {
 		boolean result = new BaseExpressionEvaluator()
-			.evalBoolean("contains(haystack, needle)", var ->
-				var.equals("haystack") ? Arrays.asList("one", "two")
-					: var.equals("needle") ? needle
-					: null);
+			.evalBoolean("contains(haystack, needle)",
+				new VariableBinding()
+					.add("haystack", Arrays.asList("one", "two"))
+					.add("needle", needle));
 
 		assertThat(result).isEqualTo(expectedResult);
 	}
