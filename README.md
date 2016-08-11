@@ -38,8 +38,7 @@ for us. It also gave us full control over the grammar and opportunity to learn A
 ## Syntax
 
 Expression syntax can be found in [ANTLR source file](src/main/antlr4/vexpressed/grammar/Expr.g4)
-and is also described in [Syntax explanation](docs/syntax.md). But you probably want to see some
-examples first.
+and is also explained in [here](docs/syntax.md). But let's see some examples first.
 
 
 ## Examples
@@ -48,7 +47,7 @@ Following examples can be found in [Scrapbook.java](src/test/java/Scrapbook.java
 
 ### Basics
 
-Let's start with something very simple - adding two numbers together (this prints 11):
+We'll start with something very simple - adding two numbers together (this prints 11):
 ```
 System.out.println("5+6 = " + VexpressedUtils.eval("5+6", NULL_VARIABLE_RESOLVER, null));
 ```
@@ -65,34 +64,26 @@ Normal expected precedence rules apply (power is right associative):
 
 ### Variables
 
-Let's use some variables - this is the reason why expressions are useful because variables can
-change from invocation to invocation of the same expression. *Vexpressed* highest abstraction for
-variable resolution is called `VariableResolver` - it takes variable name in and returns its value
-(`Object`) out. In this example, any variable will return 2 and the resolver is implemented as
-lambda:
+It's time to use some variables - this is the reason why expressions are useful because variables
+can change from invocation to invocation of the same expression. *Vexpressed* highest abstraction
+for variable resolution is called `VariableResolver` - it takes variable name in and returns its
+value (`Object`) out. In this example, any variable will return 2 and the resolver is implemented
+as lambda:
 ```
 eval("a * 3", var -> 2, null) // returns 6, because a (or any other variable) is 2
 ```
 
-Of course we don't want all variables to be the same, but for that we have to define what variable
-returns what. Let's say we have an object of type `Rectangle` with fields `a` and `b` and we want
-to use these as variables. Firstly, we define the mapper for these variables:
+Of course we don't want all variables to be the same. We will use `VariableBinding` which is simple
+`VariableResolver` implementation that is based internally on `Map`.
 ```
-VariableMapper<Rectangle> rectangleMapper = new VariableMapper<Rectangle>()
-	.define("a", ExpressionType.INTEGER, r -> r.a)
-	.define("b", ExpressionType.INTEGER, r -> r.b)
-	.finish();
-```
-
-Now we can use the same mapper for the same expression, but we call `resolverFor` on the mapper
-using different rectangles - this returns `VariableResolver` that resolves variables as defined
-in the mapper, but "closes over" different instances and returns different values - as expected:
-```
-eval("a * b", rectangleMapper.resolverFor(new Rectangle(3, 4)), null) // returns 12
-eval("a * b", rectangleMapper.resolverFor(new Rectangle(2, 5)), null) // returns 10
+VariableBinding varResolver = new VariableBinding()
+	.add("a", 3)
+	.add("b", 6);
+eval("a * b", varResolver, null);
 ```
 
-For more about variables see [this document](docs/variables.md).
+There are other, more declarative ways how to define mapping from variables names to class fields
+(or anything, really). For more about variables see [this document](docs/variables.md).
 
 ### Functions
 
@@ -127,8 +118,53 @@ For more about functions see [this document](docs/functions.md).
 
 ### `BaseExpressionEvaluator` for the rescue
 
-TODO: the idea behind defining functions, custom operator handler and then calling it with
-various `VariableMappers`
+We want more from our expression solution. For concrete use case we want to be able to specify
+what variables and functions will be available and we also want to be able to verify that the
+expression is valid (before we let user to save it, for example). This always start with
+a particular place where we want to use it (use case).
+
+Instead of using `VexpressedUtils.eval` which must be always provided both variable and function
+resolvers we may use `BaseExpressionEvaluator` which contains its `FunctionMapper`. Methods
+`addFunctionsFrom(delegate)` and `addFunction` allow us to initialize the evaluator with proper
+mix of supported functions. Evaluator also by default cache parse trees for most used expressions:
+```
+expressionEvaluator = new BaseExpressionEvaluator()
+	.addFunctionsFrom(this);
+```
+
+Here we create evaluator that caches 50 most recently used expressions (only their parse trees,
+not their results, of course!) and scans `this` object for defined functions. In this case we
+use simple logic that relevant functions are defined close to the point where they are used.
+
+When we want to evaluate an expression we simply call:
+```
+result = expressionEvaluator.eval(expression, variableResolver);
+```
+
+We provide variable resolver for each expression invocation, typically using `VariableMapper`
+as a definition (see [Variables](docs/variables.md)). Variable mapper is defined just once per
+use case - typically at the same place where expression evaluator is. This combo allows us to get
+some metadata about evaluator:
+```
+return new ExpressionIdentifiers(
+	variableMapper.variableInfo(),
+	expressionEvaluator.functionInfo());
+```
+
+This allows client code to offer suggestions for variable or function names and types, and for
+function it also describes their parameters (name, type).
+
+We can also check the expression while it is created (e.g. on UI) without evaluating it (which we
+cannot as we don't know how to get concrete values for the variables):
+```
+ExpressionType resultType = expressionEvaluator.check(expression, ADJUSTABLE_FORECAST_VARIABLES);
+```
+
+If the expression is invalid it will throw an exception. For more about expression validations
+and metadata see [this document](docs/validation.md).
+
+TODO - extend BaseExpressionEvaluator with DefaultExpressionEvaluator and add
+variable mapper to the constructor
 
 
 ## Open for discussion

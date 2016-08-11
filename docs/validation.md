@@ -1,4 +1,4 @@
-# Validation
+# Validation and metadata
 
 TODO:
 VariableTypeResolver
@@ -7,3 +7,9 @@ ExpressionValidatorVisitor
 VexpressedUtils.check(...)
 BaseExpressionEvaluator.check(...)
 ExpressionIdentifiers
+
+```
+return new ExpressionIdentifiers(
+	variableMapper.variableInfo(),
+	expressionEvaluator.functionInfo());
+```

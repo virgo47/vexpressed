@@ -25,7 +25,10 @@ public class Scrapbook {
 		eval("a * 3", var -> 2, null);
 
 		// static map-like variable mapping with VariableBinding
-		eval("a * b", new VariableBinding().add("a", 3).add("b", 6), null);
+		VariableResolver varResolver = new VariableBinding()
+			.add("a", 3)
+			.add("b", 6);
+		eval("a * b", varResolver, null);
 
 		// variable mapper for type Rectangle
 		VariableMapper<Rectangle> rectangleMapper = new VariableMapper<Rectangle>()
@@ -53,7 +56,7 @@ public class Scrapbook {
 		functionMapper = new FunctionMapper().registerFunction(
 			"isLargerThan", Scrapbook.class, "areaLargerThan", VariableResolver.class, int.class);
 
-		VariableResolver varResolver = rectangleMapper.resolverFor(new Rectangle(3, 4));
+		varResolver = rectangleMapper.resolverFor(new Rectangle(3, 4));
 		// function is used only with one argument, the area we compare the actual area with
 		eval("isLargerThan(10)", varResolver, functionMapper.executor(varResolver));
 		varResolver = rectangleMapper.resolverFor(new Rectangle(3, 2));
