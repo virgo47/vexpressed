@@ -35,8 +35,8 @@ Obviously, we can construct function mapper only once and keep it in some field 
 the function we can also specify the name of the parameter and even change its order - unnamed
 arguments will be used positionally against any unused parameter names. There is one difference
 here to notice - we had to wrap the numbers into a list because `FunctionMapper` currently does not
-support varargs (varargs itself does not affect our expression grammar, only the execution of the
-function).
+support varargs. (Vararg support itself does not affect our expression grammar but it needs to
+be added to the implementation of the function execution.)
 
 Another thing to notice is that we scanned for functions on a class (`Scrapbook.class`)
 but we can also scan on an instance. This allows us to run functions implemented even on managed

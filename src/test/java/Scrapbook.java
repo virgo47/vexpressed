@@ -7,6 +7,7 @@ import vexpressed.meta.ExpressionType;
 import vexpressed.support.ExpressionFunction;
 import vexpressed.support.FunctionMapper;
 import vexpressed.support.FunctionParam;
+import vexpressed.support.VariableBinding;
 import vexpressed.support.VariableMapper;
 
 import java.util.Collection;
@@ -23,10 +24,13 @@ public class Scrapbook {
 		// variable
 		eval("a * 3", var -> 2, null);
 
+		// static map-like variable mapping with VariableBinding
+		eval("a * b", new VariableBinding().add("a", 3).add("b", 6), null);
+
 		// variable mapper for type Rectangle
 		VariableMapper<Rectangle> rectangleMapper = new VariableMapper<Rectangle>()
-			.define("a", ExpressionType.INTEGER, o -> o.a)
-			.define("b", ExpressionType.INTEGER, o -> o.b)
+			.define("a", ExpressionType.INTEGER, r -> r.a)
+			.define("b", ExpressionType.INTEGER, r -> r.b)
 			.finish();
 		// and now use the same mapper with the same expression for two different objects
 		eval("a * b", rectangleMapper.resolverFor(new Rectangle(3, 4)), null);

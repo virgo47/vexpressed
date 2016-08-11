@@ -34,6 +34,14 @@ for us. It also gave us full control over the grammar and opportunity to learn A
 
 ![UML Class diagram - core](docs/imgs/core-classes.png)
 
+
+## Syntax
+
+Expression syntax can be found in [ANTLR source file](src/main/antlr4/vexpressed/grammar/Expr.g4)
+and is also described in [Syntax explanation](docs/syntax.md). But you probably want to see some
+examples first.
+
+
 ## Examples
 
 Following examples can be found in [Scrapbook.java](src/test/java/Scrapbook.java).
@@ -71,8 +79,8 @@ returns what. Let's say we have an object of type `Rectangle` with fields `a` an
 to use these as variables. Firstly, we define the mapper for these variables:
 ```
 VariableMapper<Rectangle> rectangleMapper = new VariableMapper<Rectangle>()
-	.define("a", ExpressionType.INTEGER, o -> o.a)
-	.define("b", ExpressionType.INTEGER, o -> o.b)
+	.define("a", ExpressionType.INTEGER, r -> r.a)
+	.define("b", ExpressionType.INTEGER, r -> r.b)
 	.finish();
 ```
 
@@ -84,9 +92,7 @@ eval("a * b", rectangleMapper.resolverFor(new Rectangle(3, 4)), null) // returns
 eval("a * b", rectangleMapper.resolverFor(new Rectangle(2, 5)), null) // returns 10
 ```
 
-You can always roll in your own implementation of `VariableResolver` with the support around it,
-some if it can be done easily with lambda. For instance, if you want to provide variables in
-a `Map` you can simply implement it as `var -> map.get(var)`. 
+For more about variables see [this document](docs/variables.md).
 
 ### Functions
 
@@ -119,16 +125,13 @@ Obviously, we can construct function mapper only once and keep it in some field 
 
 For more about functions see [this document](docs/functions.md).
 
-### Custom operators
-
-TODO
-
 ### `BaseExpressionEvaluator` for the rescue
 
 TODO: the idea behind defining functions, custom operator handler and then calling it with
 various `VariableMappers`
 
-## TODO
+
+## Open for discussion
 
 * ExpressionValidatorVisitor should return not just ExpressionType, but our type + real Java type
 (this allows to do better checking for comparison operator for instance)

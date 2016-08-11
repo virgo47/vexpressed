@@ -25,6 +25,7 @@ or as a value of a variable, and any type can also be returned by the expression
 reason we don't mention these cases in the next sections and focus only on specific
 support for built-in operations.
 
+
 ## STRING support
 
 String supports binary `+` which returns concatenations of the two strings. In fact,
@@ -40,6 +41,7 @@ Examples:
 
 In both cases the returned type is `STRING`.
 
+
 ## BOOLEAN support
 
 Logical values `true` and `false` are built-in literals (case-insensitive) and also the only
@@ -49,6 +51,7 @@ technically also return null value, but that would produce error in most operati
 Boolean is a result of any relational operation (`eq`, `ne`/`neq`, `gt`, `lt`, `ge`, `le`)
 and also the only allowed type for operands and a return type of logical operations
 (`not`, `and`, `or`).
+
 
 ## INTEGER and DECIMAL support
 
@@ -78,6 +81,7 @@ exponentiation significantly and are provided here only for completeness.
 > mitigated by using `asInteger(...)` function around the problematic part of expression
 > if we insist that on integer division and we are sure the result fits into integer range.
 
+
 ## Number precision
 
 Number precision is important for decimal calculation and describes how many numbers after
@@ -95,6 +99,7 @@ visitor = new ExpressionCalculatorVisitor(variableResolver)
 
 If using `BaseExpressionEvaluator` you have to subclass it and override `adjustCalculatorVisitor`
 where you call `max(Result)Scale` methods on the provided calculator visitor instance.
+
 
 ## Temporal types
 
@@ -117,6 +122,7 @@ Relational operations are also supported between the same type of temporal value
 mixing types causes runtime failure (expression will not be evaluated). There is no support
 for data literals (yet) but you can 
 
+
 ## Other types
 
 Values of other types are not supported by any operations, but are respected and not
@@ -127,3 +133,6 @@ by a function or when resolved as a variable value.
 Any types that can be compared (implementing Java `Comparable`) can also be compared
 using relational operations but types on both sides must be the same, otherwise runtime
 failure during expression evaluation occurs.
+
+List constructor (e.g. `[1, 2, 3]`) produces `OBJECT`. There is no further special treatment
+of collections beyond their creation - this is all left up for custom functions/operators.
