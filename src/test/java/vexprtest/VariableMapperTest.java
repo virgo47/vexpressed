@@ -12,7 +12,7 @@ import java.util.Set;
 import org.assertj.core.api.Condition;
 import org.testng.annotations.Test;
 import vexpressed.core.UnknownVariable;
-import vexpressed.meta.VariableDefinition;
+import vexpressed.meta.VariableMetadata;
 import vexpressed.support.VariableMapper;
 import vexpressed.validation.VariableTypeResolver;
 
@@ -34,13 +34,13 @@ public class VariableMapperTest {
 			.define("x", DECIMAL, o -> 5)
 			.define("s", STRING, o -> "");
 
-		Set<VariableDefinition> varInfo = variables.variableInfo();
+		Set<VariableMetadata> varInfo = variables.variableMetadata();
 		assertThat(varInfo).hasSize(2);
-		Iterator<VariableDefinition> iterator = varInfo.iterator();
-		VariableDefinition var1 = iterator.next();
+		Iterator<VariableMetadata> iterator = varInfo.iterator();
+		VariableMetadata var1 = iterator.next();
 		assertThat(var1.name).isEqualTo("s");
 		assertThat(var1.type).isEqualTo(STRING);
-		VariableDefinition var2 = iterator.next();
+		VariableMetadata var2 = iterator.next();
 		assertThat(var2.name).isEqualTo("x");
 		assertThat(var2.type).isEqualTo(DECIMAL);
 	}
@@ -65,13 +65,13 @@ public class VariableMapperTest {
 			.define("x", DECIMAL, o -> 5)
 			.addDelegate(delegate, o -> o);
 
-		Set<VariableDefinition> varInfo = variables.variableInfo();
+		Set<VariableMetadata> varInfo = variables.variableMetadata();
 		assertThat(varInfo).hasSize(2);
-		Iterator<VariableDefinition> iterator = varInfo.iterator();
-		VariableDefinition var1 = iterator.next();
+		Iterator<VariableMetadata> iterator = varInfo.iterator();
+		VariableMetadata var1 = iterator.next();
 		assertThat(var1.name).isEqualTo("s");
 		assertThat(var1.type).isEqualTo(STRING);
-		VariableDefinition var2 = iterator.next();
+		VariableMetadata var2 = iterator.next();
 		assertThat(var2.name).isEqualTo("x");
 		assertThat(var2.type).isEqualTo(DECIMAL);
 	}
@@ -104,13 +104,13 @@ public class VariableMapperTest {
 			.addDelegate(delegate1, o -> o)
 			.addDelegate(delegate2, o -> o);
 
-		Set<VariableDefinition> varInfo = variables.variableInfo();
+		Set<VariableMetadata> varInfo = variables.variableMetadata();
 		assertThat(varInfo).hasSize(2);
-		Iterator<VariableDefinition> iterator = varInfo.iterator();
-		VariableDefinition var1 = iterator.next();
+		Iterator<VariableMetadata> iterator = varInfo.iterator();
+		VariableMetadata var1 = iterator.next();
 		assertThat(var1.name).isEqualTo("x");
 		assertThat(var1.type).isEqualTo(STRING);
-		VariableDefinition var2 = iterator.next();
+		VariableMetadata var2 = iterator.next();
 		assertThat(var2.name).isEqualTo("y");
 		assertThat(var2.type).isEqualTo(OBJECT);
 	}

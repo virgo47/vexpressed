@@ -6,6 +6,11 @@ import static org.testng.Assert.assertTrue;
 import static vexpressed.meta.ExpressionType.INTEGER;
 import static vexpressed.meta.ExpressionType.STRING;
 
+import vexpressed.core.FunctionExecutionFailed;
+import vexpressed.core.VariableResolver;
+import vexpressed.meta.FunctionMetadata;
+import vexpressed.support.FunctionMapper;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,10 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.testng.annotations.Test;
-import vexpressed.core.FunctionExecutionFailed;
-import vexpressed.core.VariableResolver;
-import vexpressed.meta.FunctionDefinition;
-import vexpressed.support.FunctionMapper;
 
 public class ExpressionFunctionTest extends TestBase {
 
@@ -78,12 +79,12 @@ public class ExpressionFunctionTest extends TestBase {
 
 	@Test
 	public void functionInfoReportsParamDefinitions() {
-		Set<FunctionDefinition> functionDefinitions = new FunctionMapper()
+		Set<FunctionMetadata> functionMetadata = new FunctionMapper()
 			.registerFunction("func", new TestFunctions(), "multiParamFunc",
 				String.class, String.class, Integer.class)
-			.functionInfo();
-		assertThat(functionDefinitions).hasSize(1);
-		FunctionDefinition funcDef1 = functionDefinitions.iterator().next();
+			.functionMetadata();
+		assertThat(functionMetadata).hasSize(1);
+		FunctionMetadata funcDef1 = functionMetadata.iterator().next();
 		assertThat(funcDef1.name).isEqualTo("func");
 		assertThat(funcDef1.params).hasSize(3);
 		assertThat(funcDef1.params[0].name).isEqualTo("arg0");
@@ -150,12 +151,12 @@ public class ExpressionFunctionTest extends TestBase {
 
 	@Test
 	public void functionInfoWithVariableResolverDoesNotReportResolver() {
-		Set<FunctionDefinition> functionDefinitions = new FunctionMapper()
+		Set<FunctionMetadata> functionMetadata = new FunctionMapper()
 			.registerFunction("fun_x", new TestFunctions(),
 				"var_x", VariableResolver.class)
-			.functionInfo();
-		assertThat(functionDefinitions).hasSize(1);
-		FunctionDefinition funcDef1 = functionDefinitions.iterator().next();
+			.functionMetadata();
+		assertThat(functionMetadata).hasSize(1);
+		FunctionMetadata funcDef1 = functionMetadata.iterator().next();
 		assertThat(funcDef1.name).isEqualTo("fun_x");
 		assertThat(funcDef1.params).hasSize(0);
 	}

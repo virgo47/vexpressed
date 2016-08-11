@@ -3,7 +3,7 @@ package vexpressed.support;
 import vexpressed.core.UnknownVariable;
 import vexpressed.core.VariableResolver;
 import vexpressed.meta.ExpressionType;
-import vexpressed.meta.VariableDefinition;
+import vexpressed.meta.VariableMetadata;
 import vexpressed.validation.VariableTypeResolver;
 
 import java.util.ArrayList;
@@ -97,13 +97,13 @@ public class VariableMapper<T> implements VariableTypeResolver {
 			: ResolutionResult.UNRESOLVED;
 	}
 
-	public Set<VariableDefinition> variableInfo() {
-		TreeSet<VariableDefinition> result = variableTypes.entrySet().stream()
-			.map(e -> new VariableDefinition(e.getKey(), e.getValue()))
+	public Set<VariableMetadata> variableMetadata() {
+		TreeSet<VariableMetadata> result = variableTypes.entrySet().stream()
+			.map(e -> new VariableMetadata(e.getKey(), e.getValue()))
 			.collect(Collectors.toCollection(() ->
 				new TreeSet<>(Comparator.comparing(vd -> vd.name))));
 		for (MapperDelegate delegate : mapperDelegates) {
-			result.addAll(delegate.delegateMapper.variableInfo());
+			result.addAll(delegate.delegateMapper.variableMetadata());
 		}
 		return result;
 	}

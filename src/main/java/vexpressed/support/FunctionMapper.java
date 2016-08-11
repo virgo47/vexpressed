@@ -5,7 +5,7 @@ import vexpressed.core.FunctionExecutionFailed;
 import vexpressed.core.FunctionExecutor;
 import vexpressed.core.VariableResolver;
 import vexpressed.meta.ExpressionType;
-import vexpressed.meta.FunctionDefinition;
+import vexpressed.meta.FunctionMetadata;
 import vexpressed.meta.FunctionParameterDefinition;
 import vexpressed.validation.FunctionTypeResolver;
 
@@ -143,9 +143,9 @@ public class FunctionMapper implements FunctionTypeResolver {
 		return methodInfo;
 	}
 
-	public Set<FunctionDefinition> functionInfo() {
+	public Set<FunctionMetadata> functionMetadata() {
 		return methodMap.entrySet().stream()
-			.map(e -> new FunctionDefinition(e.getKey(),
+			.map(e -> new FunctionMetadata(e.getKey(),
 				e.getValue().returnExpressionType, e.getValue().parameterDefinitions()))
 			.collect(Collectors.toCollection(() ->
 				new TreeSet<>(Comparator.comparing(fd -> fd.name))));

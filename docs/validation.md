@@ -9,7 +9,7 @@ BaseExpressionEvaluator.check(...)
 ExpressionIdentifiers
 
 ```
-return new ExpressionIdentifiers(
-	variableMapper.variableInfo(),
-	expressionEvaluator.functionInfo());
+return new ExpressionMetadata(
+	variableMapper.variableMetadata(),
+	expressionEvaluator.functionMetadata());
 ```

@@ -15,7 +15,7 @@ and `OBJECT`
 * Convenient classes for definition of variable resolution.
 * Easy to wrap around any Java object for variable resolution (and super-easy for `Map`).
 * Custom operators (combination of +, -, *, /, ^, %, ...).
-* Based on Java 8 and using lambdas a lot.
+* Requires Java 8.
 
 Missing but considered for future versions:
 
@@ -136,35 +136,41 @@ Here we create evaluator that caches 50 most recently used expressions (only the
 not their results, of course!) and scans `this` object for defined functions. In this case we
 use simple logic that relevant functions are defined close to the point where they are used.
 
+Note that the internal function mapper is initialized with predefined functions from
+[BasicFunctions](src/main/java/vexpressed/BasicFunctions.java).
+
 When we want to evaluate an expression we simply call:
 ```
 result = expressionEvaluator.eval(expression, variableResolver);
 ```
 
-We provide variable resolver for each expression invocation, typically using `VariableMapper`
-as a definition (see [Variables](docs/variables.md)). Variable mapper is defined just once per
-use case - typically at the same place where expression evaluator is. This combo allows us to get
-some metadata about evaluator:
+We provide variable resolver for each expression invocation, but because in many cases we want
+to use `VariableMapper` for our variable definitions (see [Variables](docs/variables.md)) we
+can use another pre-cooked evaluator.
+
+### `VariableMapperExpressionEvaluator`
+
+`VariableMapperExpressionEvaluator` works similar to `BaseExpressionEvaluator` but we provide
+`VariableMapper` to its constructor. Because `VariableMapper` defines how to get variable values
+from a provided object we dont't provide `VariableResolver` into `eval` method - rather we provide
+the object from which we extract the values.
 ```
-return new ExpressionIdentifiers(
-	variableMapper.variableInfo(),
-	expressionEvaluator.functionInfo());
+result = expressionEvaluator.eval(expression, object);
 ```
 
+`VariableMapper` will do the rest for us (see [Variables](docs/variables.md) for details).
+This evaluator also has `expressionMetadata()` method that returns `ExpressionMetadata`.
 This allows client code to offer suggestions for variable or function names and types, and for
 function it also describes their parameters (name, type).
 
 We can also check the expression while it is created (e.g. on UI) without evaluating it (which we
 cannot as we don't know how to get concrete values for the variables):
 ```
-ExpressionType resultType = expressionEvaluator.check(expression, ADJUSTABLE_FORECAST_VARIABLES);
+ExpressionType resultType = expressionEvaluator.check(expression);
 ```
 
 If the expression is invalid it will throw an exception. For more about expression validations
 and metadata see [this document](docs/validation.md).
-
-TODO - extend BaseExpressionEvaluator with DefaultExpressionEvaluator and add
-variable mapper to the constructor
 
 
 ## Open for discussion

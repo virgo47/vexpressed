@@ -3,7 +3,7 @@ package vexpressed;
 import vexpressed.core.ExpressionCalculatorVisitor;
 import vexpressed.core.VariableResolver;
 import vexpressed.meta.ExpressionType;
-import vexpressed.meta.FunctionDefinition;
+import vexpressed.meta.FunctionMetadata;
 import vexpressed.support.FunctionMapper;
 import vexpressed.validation.ExpressionValidatorVisitor;
 import vexpressed.validation.VariableTypeResolver;
@@ -37,7 +37,7 @@ public class BaseExpressionEvaluator {
 
 	private final ParseCache expressionCache;
 
-	private FunctionMapper functionMapper = new FunctionMapper()
+	private final FunctionMapper functionMapper = new FunctionMapper()
 		.scanForFunctions(BasicFunctions.class);
 
 	/** Creates evaluator with specified cache size - size of 0 disables caching. */
@@ -111,8 +111,8 @@ public class BaseExpressionEvaluator {
 		return parseTree;
 	}
 
-	public Set<FunctionDefinition> functionInfo() {
-		return functionMapper.functionInfo();
+	public Set<FunctionMetadata> functionMetadata() {
+		return functionMapper.functionMetadata();
 	}
 
 	private interface ParseCache {
