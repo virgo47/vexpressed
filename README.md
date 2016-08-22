@@ -3,7 +3,12 @@
 "Vexed and pressed? Use Vexpressed expression library!"
 
 Simple to use expression evaluator and checker with support for variables and custom functions.
-Built with ANTLR 4.
+Built with ANTLR 4. The story of this library started with blog posts on Expression evaluation in
+Java:
+[1](https://virgo47.wordpress.com/2015/08/19/expression-evaluation-in-java-1/),
+[2](https://virgo47.wordpress.com/2015/09/15/expression-evaluation-in-java-2/),
+[3](https://virgo47.wordpress.com/2015/09/27/expression-evaluation-in-java-3/) and
+[4](https://virgo47.wordpress.com/2015/11/12/expression-evaluation-in-java-4/).
 
 
 ## Features
