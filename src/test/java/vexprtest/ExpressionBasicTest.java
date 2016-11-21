@@ -43,7 +43,7 @@ public class ExpressionBasicTest extends TestBase {
 
 	@Test
 	public void tooBigIntegerLiteralConvertedToBigDecimal() {
-		assertEquals(eval("5555555555555"), new BigDecimal("5555555555555"));
+		assertEquals(eval("5555555555555"), new BigDecimal("5555555555555.0"));
 	}
 
 	@Test
@@ -53,12 +53,12 @@ public class ExpressionBasicTest extends TestBase {
 
 	@Test
 	public void fpNumberCanContainExponent() {
-		assertEquals(eval("1.47E5"), new BigDecimal("147000"));
+		assertEquals(eval("1.47E5"), new BigDecimal("147000.0"));
 	}
 
 	@Test
 	public void fpNumberCanContainExplicitlyPositiveExponent() {
-		assertEquals(eval(".47E+3"), new BigDecimal("470"));
+		assertEquals(eval(".47E+3"), new BigDecimal("470.0"));
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class ExpressionBasicTest extends TestBase {
 
 	@Test
 	public void fpNumberCanEndWithPoint() {
-		assertEquals(eval("3."), new BigDecimal("3"));
+		assertEquals(eval("3."), new BigDecimal("3.0"));
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class ExpressionBasicTest extends TestBase {
 		assertEquals(eval("5_0"), 50);
 		assertEquals(eval("5_"), 5);
 		assertEquals(eval("5_.1_"), new BigDecimal("5.1"));
-		assertEquals(eval("5_.1_E1_"), new BigDecimal("51"));
+		assertEquals(eval("5_.1_E1_"), new BigDecimal("51.0"));
 		// note that _5 is valid variable name, so is _5.5 (dot is part of valid ID)
 		// _5E+1 would resolve _5E variable and add it to 1
 	}
@@ -120,6 +120,11 @@ public class ExpressionBasicTest extends TestBase {
 	@Test
 	public void stringLiteralEscapedQuoteInterpretedProperly() {
 		assertEquals(eval("'str''val'"), "str'val");
+	}
+
+	@Test
+	public void stringLiteralCanContainComments() {
+		assertEquals(eval("'#/*does nothing*/'"), "#/*does nothing*/");
 	}
 
 	@Test
@@ -295,8 +300,8 @@ public class ExpressionBasicTest extends TestBase {
 		assertFalse((boolean) eval("/*true AND*/ false"));
 		assertFalse((boolean) eval("/*true \nAND*/ false"));
 		assertTrue((boolean) eval("true /* AND \nfalse */"));
-		assertTrue((boolean) eval("true // AND false"));
-		assertTrue((boolean) eval("false // AND false\nOR true"));
+		assertTrue((boolean) eval("true # AND false"));
+		assertTrue((boolean) eval("false # AND false\nOR true"));
 	}
 
 	@Test

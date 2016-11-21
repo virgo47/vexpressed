@@ -13,6 +13,7 @@ import static vexpressed.grammar.ExprParser.OP_DIV;
 import static vexpressed.grammar.ExprParser.OP_EQ;
 import static vexpressed.grammar.ExprParser.OP_GE;
 import static vexpressed.grammar.ExprParser.OP_GT;
+import static vexpressed.grammar.ExprParser.OP_IDIV;
 import static vexpressed.grammar.ExprParser.OP_LE;
 import static vexpressed.grammar.ExprParser.OP_LT;
 import static vexpressed.grammar.ExprParser.OP_MUL;
@@ -46,6 +47,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 
 	public static final int DEFAULT_MAX_SCALE = 15;
 	public static final int DEFAULT_MAX_RESULT_SCALE = 6;
+	public static final int DEFAULT_MIN_RESULT_SCALE = 1;
 
 	private final VariableResolver variableResolver;
 	private FunctionExecutor functionExecutor;
@@ -195,7 +197,9 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 			case OP_MUL:
 				return left.multiply(right);
 			case OP_DIV:
-				return left.divide(right, maxScale, roundingMode).stripTrailingZeros();
+				return divide(left, right);
+			case OP_IDIV:
+				return narrowNumberResult(left.divideToIntegralValue(right).longValue());
 			case OP_REMAINDER:
 				return left.remainder(right);
 			case OP_POW:
@@ -211,23 +215,29 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	private Number integerArithmetic(ArithmeticOpContext ctx, long left, int right) {
 		switch (ctx.op.getType()) {
 			case OP_ADD:
-				return narrowIntegerResult(left + right);
+				return narrowNumberResult(left + right);
 			case OP_SUB:
-				return narrowIntegerResult(left - right);
+				return narrowNumberResult(left - right);
 			case OP_MUL:
-				return narrowIntegerResult(left * right);
+				return narrowNumberResult(left * right);
 			case OP_DIV:
-				return narrowIntegerResult(left / right);
+				return narrowNumberResult(divide(new BigDecimal(left), new BigDecimal(right)));
+			case OP_IDIV:
+				return narrowNumberResult(left / right);
 			case OP_REMAINDER:
-				return narrowIntegerResult(left % right);
+				return narrowNumberResult(left % right);
 			case OP_POW:
-				return narrowIntegerResult(BigInteger.valueOf(left).pow(right));
+				return narrowNumberResult(BigInteger.valueOf(left).pow(right));
 			default:
 				throw new ExpressionException("Unknown operator " + ctx.op);
 		}
 	}
 
-	private Number narrowIntegerResult(Number result) {
+	private BigDecimal divide(BigDecimal left, BigDecimal right) {
+		return left.divide(right, maxScale, roundingMode).stripTrailingZeros();
+	}
+
+	private Number narrowNumberResult(Number result) {
 		return (Number) narrowDownNumberTypes(result);
 	}
 
@@ -411,6 +421,8 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 			BigDecimal bdResult = (BigDecimal) result;
 			if (bdResult.scale() > maxResultScale) {
 				result = bdResult.setScale(maxResultScale, roundingMode);
+			} else if (bdResult.scale() == 0) {
+				result = bdResult.setScale(DEFAULT_MIN_RESULT_SCALE, roundingMode);
 			}
 		}
 		return result;

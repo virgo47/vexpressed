@@ -63,23 +63,14 @@ There are, however, differences between integer and decimal operations:
 * Addition, subtraction and multiplication does expected things in all contexts.
 The only surprise may happen when the result of integer operation would overflow
 integer range - in that case decimal result is returned.
-* Division operation between two integer types produces integer result (rounded down,
-known as "floor" operation), decimal division produces decimal results up to
-configured precision.
+* Division operation `/` always returns decimal result.
+* Integer division `//` always returns integer result (rounded down, known as "floor" operation).
 * Power operation between two integers produces integer result, or decimal result
 when out of integer range. Otherwise it produces decimal result. If right side is
 integer the calculation is as expected, if right side is decimal than both sides
 are converted to IEEE 754 double precision and power is calculated on these, result is
 converted back to decimal. These details should not affect result of a single
 exponentiation significantly and are provided here only for completeness.
-
-> :warning: Note that automatic result promotion after integer operation overflow may
-> bring correct, but surprising results. In integer range `(a+a)/(a+1)` returns `1` and
-> the result of `%` (remainder) operation would be `a-1`. But if overflow switches first
-> `a+a` to decimal the result for division is also decimal - something very close to `2`,
-> depending on the chosen precision. Reminder result is still as expected. This can be
-> mitigated by using `asInteger(...)` function around the problematic part of expression
-> if we insist that on integer division and we are sure the result fits into integer range.
 
 
 ## Number precision

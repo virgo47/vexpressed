@@ -33,7 +33,7 @@ expr: STRING_LITERAL # stringLiteral
 	| OP_NOT expr # logicNot
 	| left=expr op=CUSTOM_OP right=expr # customOp // custom op made of symbols is higher than other binary ops
 	| <assoc=right> left=expr op=OP_POW right=expr # arithmeticOp
-	| left=expr op=(OP_MUL | OP_DIV | OP_REMAINDER) right=expr # arithmeticOp
+	| left=expr op=(OP_MUL | OP_DIV | OP_IDIV | OP_REMAINDER) right=expr # arithmeticOp
 	| left=expr op=(OP_ADD | OP_SUB) right=expr # arithmeticOp
 	| left=expr ID right=expr # infixFunction // function made of words (typically) is after arithmetic
 	| left=expr op=(OP_LT | OP_GT | OP_EQ | OP_NE | OP_LE | OP_GE) right=expr # comparisonOp
@@ -62,9 +62,10 @@ OP_NOT: N O T | '!';
 OP_ADD: '+';
 OP_SUB: '-';
 OP_MUL: '*';
+OP_POW: '^' | '**';
+OP_IDIV: '//';
 OP_DIV: '/';
 OP_REMAINDER: '%'; // reminder, not modulo, e.g. -5 % 3 is -2, not 3
-OP_POW: '^';
 
 K_NULL: N U L L;
 
@@ -87,10 +88,10 @@ SPACES: [ \u000B\t\r\n] -> channel(HIDDEN) ;
 
 COMMENT: '/*' .*? '*/' -> skip ;
 
-LINE_COMMENT: '//' ~[\r\n]* -> skip ;
+LINE_COMMENT: ~'\\' '#' ~[\r\n]* -> skip ;
 
 // after line comment and comment and similar things not to overshadow them
-CUSTOM_OP: [#+*/<>=!|.;:?~_@$%^&-]+;
+CUSTOM_OP: [+*/<>=!|.;:?~_@$%^&-]+;
 
 UNEXPECTED_CHAR: . ;
 

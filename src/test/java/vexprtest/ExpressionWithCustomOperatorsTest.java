@@ -16,6 +16,6 @@ public class ExpressionWithCustomOperatorsTest extends TestBase {
 	public void functionExecutionWithConstantFunction() {
 		functionExecutor = (fname, params) -> 1;
 		// TODO evaluation
-		assertEquals(eval("1 #// 2"), 2);
+		assertEquals(eval("1 +*+ 2"), 2);
 	}
 }
