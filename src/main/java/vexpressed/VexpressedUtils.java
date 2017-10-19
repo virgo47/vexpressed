@@ -12,8 +12,8 @@ import vexpressed.validation.FunctionTypeResolver;
 import vexpressed.validation.VariableTypeResolver;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -46,8 +46,7 @@ public final class VexpressedUtils {
 	 * trees for repeated evaluations of the same expression.
 	 */
 	public static ParseTree createParseTree(String expression) {
-		ANTLRInputStream input = new ANTLRInputStream(expression);
-		ExprLexer lexer = new ExprLexer(input);
+		ExprLexer lexer = new ExprLexer(CharStreams.fromString(expression));
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		ExprParser parser = new ExprParser(tokens);
 		parser.removeErrorListeners();

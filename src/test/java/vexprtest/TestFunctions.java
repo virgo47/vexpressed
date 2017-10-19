@@ -63,6 +63,6 @@ public class TestFunctions {
 	}
 
 	public Integer var_x(VariableResolver variableResolver) {
-		return (Integer) variableResolver.resolve("x");
+		return variableResolver.resolveSafe("x");
 	}
 }

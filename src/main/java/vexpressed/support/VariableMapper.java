@@ -16,7 +16,24 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Configuration of supported variables for objects of type {@link T}. */
+/**
+ * Configuration of supported variables provided by objects of type {@link T}. This means that
+ * the value of a variable (name of which is always String, resolved value can be any type) is
+ * somehow extracted from an object of type {@link T}. This can happen either directly, as defined
+ * by {@link #define(String, ExpressionType, Function)}, or indirectly adding another mapper with
+ * {@link #addDelegate(VariableMapper, Function)}.
+ *
+ * This configuration object can be used to obtain {@link #variableMetadata()} (list of supported
+ * variable names and their types) for a particular expression or a set of possible expressions
+ * in a specific context. E.g. there can be an extension point where we can define any expression,
+ * but all of them can use only pre-concieved set of variables and functions.
+ *
+ * It can also resolve variables for a particular object, but this is not a convenient way how to
+ * use it during expression evaluation. Instead, use {@link #resolverFor(Object)} to obtain
+ * a {@link VariableResolver} that "wraps" around an instance of type {@link T}.
+ *
+ * @param <T> type of an source object used to resolve the variable
+ */
 public class VariableMapper<T> implements VariableTypeResolver {
 
 	private Map<String, Function<T, Object>> variableValueFunctions = new HashMap<>();
@@ -42,7 +59,7 @@ public class VariableMapper<T> implements VariableTypeResolver {
 	/**
 	 * Defines delegate for resolving unresolved variables. The delegate can be for objects
 	 * of different type and objectFunction is used to extract the "sub-object" (identity can
-	 * be used, of course).
+	 * be used, using the same object).
 	 *
 	 * @noinspection unchecked
 	 */
@@ -73,12 +90,13 @@ public class VariableMapper<T> implements VariableTypeResolver {
 		}
 	}
 
+	/** */
 	public Object resolveVariable(String variableName, T object) {
 		ResolutionResult result = resolveInternal(variableName, object);
 		if (!result.resolved) {
 			for (MapperDelegate delegate : mapperDelegates) {
-				result = delegate.delegateMapper.resolveInternal(variableName,
-					delegate.delegateObjectFunction.apply(object));
+				result = delegate.delegateMapper.resolveInternal(
+					variableName, delegate.delegateObjectFunction.apply(object));
 				if (result.resolved) break;
 			}
 		}

@@ -76,8 +76,8 @@ public class Scrapbook {
 	}
 
 	public static boolean areaLargerThan(VariableResolver variableResolver, int threshold) {
-		int a = (int) variableResolver.resolve("a");
-		int b = (int) variableResolver.resolve("b");
+		int a = variableResolver.resolveSafe("a");
+		int b = variableResolver.resolveSafe("b");
 		return a * b > threshold;
 	}
 }
