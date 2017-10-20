@@ -1,0 +1,38 @@
+plugins {
+	id 'java'
+	id 'antlr'
+}
+
+group = 'com.virgo47'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	jcenter()
+}
+
+ext {
+	testNgVersion = '6.10'
+	assertjVersion = '3.8.0'
+	antlrVersion = '4.7'
+}
+
+sourceSets.main.antlr.srcDirs = ['src/main/antlr4']
+
+dependencies {
+	antlr "org.antlr:antlr4:${antlrVersion}"
+
+	testCompile "org.testng:testng:$testNgVersion"
+	testCompile "org.assertj:assertj-core:$assertjVersion"
+}
+
+generateGrammarSource {
+	arguments += [
+		// Package declaration in generated sources can be specified also with @header in a grammar
+		// file, but this then creates the package line twice in Maven build.
+		"-package", "com.virgo47.vexpressed.grammar",
+		"-visitor",
+		"-long-messages"
+	]
+}

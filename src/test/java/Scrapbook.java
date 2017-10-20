@@ -1,14 +1,14 @@
-import static vexpressed.core.VariableResolver.NULL_VARIABLE_RESOLVER;
+import static com.virgo47.vexpressed.core.VariableResolver.NULL_VARIABLE_RESOLVER;
 
-import vexpressed.VexpressedUtils;
-import vexpressed.core.FunctionExecutor;
-import vexpressed.core.VariableResolver;
-import vexpressed.meta.ExpressionType;
-import vexpressed.support.ExpressionFunction;
-import vexpressed.support.FunctionMapper;
-import vexpressed.support.FunctionParam;
-import vexpressed.support.VariableBinding;
-import vexpressed.support.VariableMapper;
+import com.virgo47.vexpressed.VexpressedUtils;
+import com.virgo47.vexpressed.core.FunctionExecutor;
+import com.virgo47.vexpressed.core.VariableResolver;
+import com.virgo47.vexpressed.meta.ExpressionType;
+import com.virgo47.vexpressed.support.ExpressionFunction;
+import com.virgo47.vexpressed.support.FunctionMapper;
+import com.virgo47.vexpressed.support.FunctionParam;
+import com.virgo47.vexpressed.support.VariableBinding;
+import com.virgo47.vexpressed.support.VariableMapper;
 
 import java.util.Collection;
 

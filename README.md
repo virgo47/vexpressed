@@ -42,7 +42,7 @@ for us. It also gave us full control over the grammar and opportunity to learn A
 
 ## Syntax
 
-Expression syntax can be found in [ANTLR source file](src/main/antlr4/vexpressed/grammar/Expr.g4)
+Expression syntax can be found in [ANTLR source file](src/main/antlr4/com/virgo47/vexpressed/grammar/Expr.g4)
 and is also explained in [here](docs/syntax.md). But let's see some examples first.
 
 
@@ -142,7 +142,7 @@ not their results, of course!) and scans `this` object for defined functions. In
 use simple logic that relevant functions are defined close to the point where they are used.
 
 Note that the internal function mapper is initialized with predefined functions from
-[BasicFunctions](src/main/java/vexpressed/BasicFunctions.java).
+[BasicFunctions](src/main/java/com/virgo47/vexpressed/BasicFunctions.java).
 
 When we want to evaluate an expression we simply call:
 ```
