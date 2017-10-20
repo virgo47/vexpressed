@@ -1,15 +1,10 @@
 package com.virgo47.vexpressed.test;
 
+import static com.virgo47.vexpressed.meta.ExpressionType.INTEGER;
+import static com.virgo47.vexpressed.meta.ExpressionType.STRING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static com.virgo47.vexpressed.meta.ExpressionType.INTEGER;
-import static com.virgo47.vexpressed.meta.ExpressionType.STRING;
-
-import com.virgo47.vexpressed.core.FunctionExecutionFailed;
-import com.virgo47.vexpressed.core.VariableResolver;
-import com.virgo47.vexpressed.meta.FunctionMetadata;
-import com.virgo47.vexpressed.support.FunctionMapper;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,12 +13,16 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
 
+import com.virgo47.vexpressed.core.ExpressionException;
+import com.virgo47.vexpressed.core.VariableResolver;
+import com.virgo47.vexpressed.meta.FunctionMetadata;
+import com.virgo47.vexpressed.support.FunctionMapper;
 import org.testng.annotations.Test;
 
 public class ExpressionFunctionTest extends TestBase {
 
-	@Test(expectedExceptions = FunctionExecutionFailed.class, expectedExceptionsMessageRegExp =
-		"Cannot execute function func because no function executor was set.")
+	@Test(expectedExceptions = ExpressionException.class, expectedExceptionsMessageRegExp =
+		"Cannot execute function func - no function executor provided!")
 	public void functionExecutionWithoutExecutorFails() {
 		eval("func()");
 	}

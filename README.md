@@ -88,7 +88,11 @@ eval("a * b", varResolver, null);
 ```
 
 There are other, more declarative ways how to define mapping from variables names to class fields
-(or anything, really). For more about variables see [this document](docs/variables.md).
+(or anything, really). Provided `VariableMapper` allows us to describe how to obtain variables
+from an object of a specific type. Later we can ask the mapper for a `VariableResolver` based
+on mapper's configuration and a particluar "evaluation context" (of that specfic type).
+
+For more about variables see [this document](docs/variables.md).
 
 ### Functions
 
@@ -102,8 +106,9 @@ eval("fun(1, 2, 3) + anyotherfun(4, 5)", NULL_VARIABLE_RESOLVER,
 ```
 This produces 15, as expected.
 
-Using `FunctionMapper` is similar to how `VariableMapper` complements `VariableResolver`.
-First we implement our function using a normal Java method spiced up with some annotations:
+Using `FunctionMapper` is similar to how `VariableMapper` complements `VariableResolver`. It
+acts as a definiton of various functions. First we implement our function using a normal Java
+method spiced up with some annotations:
 ```
 @ExpressionFunction
 public static Integer sum(@FunctionParam(name = "nums") Collection<Integer> ints) {
@@ -157,10 +162,11 @@ can use another pre-cooked evaluator.
 
 `VariableMapperExpressionEvaluator` works similar to `BaseExpressionEvaluator` but we provide
 `VariableMapper` to its constructor. Because `VariableMapper` defines how to get variable values
-from a provided object we dont't provide `VariableResolver` into `eval` method - rather we provide
-the object from which we extract the values.
+from a provided object (evaluation context, specific to each eval execution) we dont't provide
+`VariableResolver` into `eval` method - rather we provide the evaluation context object from which
+the values will be extracted during `eval`:
 ```
-result = expressionEvaluator.eval(expression, object);
+result = expressionEvaluator.eval(expression, contextObject);
 ```
 
 `VariableMapper` will do the rest for us (see [Variables](docs/variables.md) for details).

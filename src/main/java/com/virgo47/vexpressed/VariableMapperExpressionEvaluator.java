@@ -20,12 +20,8 @@ public class VariableMapperExpressionEvaluator<T> {
 		this.variableMapper = variableMapper;
 	}
 
-	public Object eval(String expression, T object) {
-		return evaluator.eval(expression, variableMapper.resolverFor(object));
-	}
-
-	public boolean evalBoolean(String expression, T object) {
-		return (boolean) eval(expression, object);
+	public <RT> RT eval(String expression, T evalContext) {
+		return evaluator.eval(expression, variableMapper.resolverFor(evalContext));
 	}
 
 	public ExpressionType check(String expression) {

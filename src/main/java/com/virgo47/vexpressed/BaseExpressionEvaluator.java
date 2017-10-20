@@ -1,17 +1,17 @@
 package com.virgo47.vexpressed;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
 import com.virgo47.vexpressed.core.ExpressionCalculatorVisitor;
 import com.virgo47.vexpressed.core.VariableResolver;
 import com.virgo47.vexpressed.meta.ExpressionType;
 import com.virgo47.vexpressed.meta.FunctionMetadata;
 import com.virgo47.vexpressed.support.FunctionMapper;
+import com.virgo47.vexpressed.support.VariableMapper;
 import com.virgo47.vexpressed.validation.ExpressionValidatorVisitor;
 import com.virgo47.vexpressed.validation.VariableTypeResolver;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
@@ -22,13 +22,11 @@ import org.antlr.v4.runtime.tree.ParseTree;
  * Object, String, Class[])} (explicit function). See {@link FunctionMapper} for more
  * as both methods are delegated to a single internal instance of this executor.
  * <p>
- * TODO: Right now there is kind of asymmetry here, because this class knows FunctionMapper
- * from support, but doesn't need VariableMapper, only VariableResolver. It should either:
- * - use both and eval would take the target object (holding values) instead of VariableResolver
- * - use none, eval would take both VariableResolver and FunctionExecutor (this is like enhanced
- * VexpressedUtils.eval(expr, varesolver, funexecutor), because it caches, etc.)
- * - split into two classes, one would implement lighter version (with caching, but without
- * support), and the other class would go to support (PREFERRED)
+ * This evaluator does support function definition, but does not imply anything about variable
+ * resolution strategy - {@link VariableResolver} must be provided for each {@link
+ * #eval(String, VariableResolver)} call. If {@link VariableMapper} is used for variable resolution
+ * definition use {@link VariableMapperExpressionEvaluator} which builds upon this evaluator
+ * and combines it with provided {@link VariableMapper}.
  */
 public class BaseExpressionEvaluator {
 
@@ -83,23 +81,21 @@ public class BaseExpressionEvaluator {
 	/**
 	 * Evaluates expression using provided variableResolver. Caches the result
 	 * of expression parsing for better performance of repeated executions.
+	 *
+	 * @param <RT> result type
 	 */
-	public Object eval(String expression, VariableResolver variableResolver) {
+	@SuppressWarnings("unchecked")
+	public <RT> RT eval(String expression, VariableResolver variableResolver) {
 		ParseTree parseTree = expressionParseTree(expression);
-		ExpressionCalculatorVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
+		ExpressionCalculatorVisitor visitor = new ExpressionCalculatorVisitor()
+			.withVariableResolver(variableResolver)
 			.withFunctionExecutor(functionMapper.executor(variableResolver));
 		adjustCalculatorVisitor(visitor);
-		return visitor.visit(parseTree);
+		return (RT) visitor.visit(parseTree);
 	}
 
 	public void adjustCalculatorVisitor(ExpressionCalculatorVisitor expressionCalculatorVisitor) {
 		// nothing by default, can be overridden
-	}
-
-	/** Like {@link #eval(String, VariableResolver)} but casts the result to boolean. */
-	public boolean evalBoolean(String expression, VariableResolver variableResolver) {
-		Object result = eval(expression, variableResolver);
-		return (boolean) result;
 	}
 
 	private ParseTree expressionParseTree(String expression) {

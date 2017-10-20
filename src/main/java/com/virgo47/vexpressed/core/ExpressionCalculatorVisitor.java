@@ -2,9 +2,6 @@ package com.virgo47.vexpressed.core;
 
 import static java.util.stream.Collectors.toCollection;
 
-import com.virgo47.vexpressed.grammar.ExprBaseVisitor;
-import com.virgo47.vexpressed.grammar.ExprParser;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.temporal.ChronoUnit;
@@ -18,42 +15,50 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/** Evaluates the expression - resolver for variables is mandatory, for functions optional. */
+import com.virgo47.vexpressed.grammar.ExprBaseVisitor;
+import com.virgo47.vexpressed.grammar.ExprParser;
+import com.virgo47.vexpressed.meta.ExpressionType;
+
+/**
+ * Evaluates the expression. It is virtually useless without {@link #variableResolver} set -
+ * use {@link #withVariableResolver(VariableResolver)} to do so. Similarly {@link
+ * #functionExecutor} can be set with {@link #withFunctionExecutor(FunctionExecutor)} when needed.
+ * <p>
+ * It is not thread-safe as it likely uses {@link VariableResolver} specific for one-off evaluation
+ */
 public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 
 	public static final int DEFAULT_MAX_SCALE = 15;
 	public static final int DEFAULT_MAX_RESULT_SCALE = 6;
-	public static final int DEFAULT_MIN_RESULT_SCALE = 1;
 
-	private final VariableResolver variableResolver;
-	private FunctionExecutor functionExecutor;
+	/** Minimal scale for {@link ExpressionType#DECIMAL}, to make it obvious. */
+	public static final int DEFAULT_MIN_RESULT_SCALE = 1;
 
 	private int maxScale = DEFAULT_MAX_SCALE;
 	private int maxResultScale = DEFAULT_MAX_RESULT_SCALE;
 	private int roundingMode = BigDecimal.ROUND_HALF_UP;
 
-	public ExpressionCalculatorVisitor(VariableResolver variableResolver) {
-		if (variableResolver == null) {
-			throw new IllegalArgumentException("Variable resolver must be provided");
-		}
+	private VariableResolver variableResolver = VariableResolver.NULL_VARIABLE_RESOLVER;
+	private FunctionExecutor functionExecutor = FunctionExecutor.NULL_FUNCTION_EXECUTOR;
+
+	public ExpressionCalculatorVisitor withVariableResolver(VariableResolver variableResolver) {
 		this.variableResolver = variableResolver;
+		return this;
 	}
 
-	public ExpressionCalculatorVisitor withFunctionExecutor(
-		FunctionExecutor functionExecutor)
-	{
+	public ExpressionCalculatorVisitor withFunctionExecutor(FunctionExecutor functionExecutor) {
 		this.functionExecutor = functionExecutor;
 		return this;
 	}
 
 	/** Maximum BigDecimal scale used during computations. */
-	public ExpressionCalculatorVisitor maxScale(int maxScale) {
+	public ExpressionCalculatorVisitor withMaxScaleForIntermediateResults(int maxScale) {
 		this.maxScale = maxScale;
 		return this;
 	}
 
 	/** Maximum BigDecimal scale for result. */
-	public ExpressionCalculatorVisitor maxResultScale(int maxResultScale) {
+	public ExpressionCalculatorVisitor withMaxResultScale(int maxResultScale) {
 		this.maxResultScale = maxResultScale;
 		return this;
 	}
@@ -218,6 +223,7 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Boolean visitComparisonOp(ExprParser.ComparisonOpContext ctx) {
 		Comparable left = (Comparable) visit(ctx.left);
 		Comparable right = (Comparable) visit(ctx.right);
@@ -235,7 +241,6 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 			left = new BigDecimal(left.toString());
 		}
 
-		//noinspection unchecked
 		int comp = left.compareTo(right);
 		switch (operator) {
 			case ExprParser.OP_EQ:
@@ -257,7 +262,12 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 
 	@Override
 	public Object visitVariable(ExprParser.VariableContext ctx) {
-		Object value = variableResolver.resolve(ctx.ID().getText());
+		String variableName = ctx.ID().getText();
+		if (variableResolver == null) {
+			throw new ExpressionException(
+				"Cannot resolve variable " + variableName + " - no variable resolver provided!");
+		}
+		Object value = variableResolver.resolve(variableName);
 		return narrowDownNumberTypes(value);
 	}
 
@@ -358,8 +368,8 @@ public class ExpressionCalculatorVisitor extends ExprBaseVisitor {
 
 	private Object executeFunction(String functionName, List<FunctionArgument> params) {
 		if (functionExecutor == null) {
-			throw new FunctionExecutionFailed("Cannot execute function " +
-				functionName + " because no function executor was set.");
+			throw new ExpressionException(
+				"Cannot execute function " + functionName + " - no function executor provided!");
 		}
 		Object result = functionExecutor.execute(functionName, params);
 		return narrowDownNumberTypes(result);

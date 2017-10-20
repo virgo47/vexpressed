@@ -1,11 +1,5 @@
 package com.virgo47.vexpressed.support;
 
-import com.virgo47.vexpressed.core.UnknownVariable;
-import com.virgo47.vexpressed.core.VariableResolver;
-import com.virgo47.vexpressed.meta.ExpressionType;
-import com.virgo47.vexpressed.meta.VariableMetadata;
-import com.virgo47.vexpressed.validation.VariableTypeResolver;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,23 +10,31 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.virgo47.vexpressed.core.UnknownVariable;
+import com.virgo47.vexpressed.core.VariableResolver;
+import com.virgo47.vexpressed.meta.ExpressionType;
+import com.virgo47.vexpressed.meta.VariableMetadata;
+import com.virgo47.vexpressed.validation.VariableTypeResolver;
+
 /**
  * Configuration of supported variables provided by objects of type {@link T}. This means that
  * the value of a variable (name of which is always String, resolved value can be any type) is
- * somehow extracted from an object of type {@link T}. This can happen either directly, as defined
- * by {@link #define(String, ExpressionType, Function)}, or indirectly adding another mapper with
- * {@link #addDelegate(VariableMapper, Function)}.
- *
- * This configuration object can be used to obtain {@link #variableMetadata()} (list of supported
+ * somehow extracted from an object of type {@link T} - the role of this object is of <b>evaluation
+ * context</b>. Variables can be obtained either directly, as defined by {@link
+ * #define(String, ExpressionType, Function)}, or indirectly adding another mapper with {@link
+ * #addDelegate(VariableMapper, Function)}.
+ * <p>
+ * Variable mapper can be used to obtain {@link #variableMetadata()} (list of supported
  * variable names and their types) for a particular expression or a set of possible expressions
  * in a specific context. E.g. there can be an extension point where we can define any expression,
  * but all of them can use only pre-concieved set of variables and functions.
+ * <p>
+ * Variable mapper can resolve variables for a particular "evaluation context" object, but this is
+ * not a convenient way how to use it during expression evaluation. Instead, use {@link
+ * #resolverFor(Object)} to obtain a {@link VariableResolver} that "wraps" around an instance of
+ * the type {@link T} (particular "evalution context").
  *
- * It can also resolve variables for a particular object, but this is not a convenient way how to
- * use it during expression evaluation. Instead, use {@link #resolverFor(Object)} to obtain
- * a {@link VariableResolver} that "wraps" around an instance of type {@link T}.
- *
- * @param <T> type of an source object used to resolve the variable
+ * @param <T> type of an source object ("evaluation context") used to resolve variables
  */
 public class VariableMapper<T> implements VariableTypeResolver {
 
@@ -60,9 +62,8 @@ public class VariableMapper<T> implements VariableTypeResolver {
 	 * Defines delegate for resolving unresolved variables. The delegate can be for objects
 	 * of different type and objectFunction is used to extract the "sub-object" (identity can
 	 * be used, using the same object).
-	 *
-	 * @noinspection unchecked
 	 */
+	@SuppressWarnings("unchecked")
 	public <DT> VariableMapper<T> addDelegate(
 		VariableMapper<DT> delegate, Function<T, DT> objectFunction)
 	{
@@ -90,13 +91,12 @@ public class VariableMapper<T> implements VariableTypeResolver {
 		}
 	}
 
-	/** */
-	public Object resolveVariable(String variableName, T object) {
-		ResolutionResult result = resolveInternal(variableName, object);
+	public Object resolveVariable(String variableName, T evalContext) {
+		ResolutionResult result = resolveInternal(variableName, evalContext);
 		if (!result.resolved) {
 			for (MapperDelegate delegate : mapperDelegates) {
 				result = delegate.delegateMapper.resolveInternal(
-					variableName, delegate.delegateObjectFunction.apply(object));
+					variableName, delegate.delegateObjectFunction.apply(evalContext));
 				if (result.resolved) break;
 			}
 		}
@@ -108,10 +108,10 @@ public class VariableMapper<T> implements VariableTypeResolver {
 		throw new UnknownVariable(variableName);
 	}
 
-	private ResolutionResult resolveInternal(String variableName, T object) {
+	private ResolutionResult resolveInternal(String variableName, T evalContext) {
 		Function<T, Object> valueFunction = variableValueFunctions.get(variableName);
 		return valueFunction != null
-			? new ResolutionResult(valueFunction.apply(object))
+			? new ResolutionResult(valueFunction.apply(evalContext))
 			: ResolutionResult.UNRESOLVED;
 	}
 
@@ -147,8 +147,8 @@ public class VariableMapper<T> implements VariableTypeResolver {
 		return variableTypes.get(variableName);
 	}
 
-	public VariableResolver resolverFor(T object) {
-		return var -> resolveVariable(var, object);
+	public VariableResolver resolverFor(T evalContext) {
+		return var -> resolveVariable(var, evalContext);
 	}
 
 	private static class MapperDelegate {

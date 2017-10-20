@@ -10,7 +10,7 @@ public interface VariableResolver {
 
 	/** Version of {@link #resolve(String)} that does not require cast in the client code. */
 	@SuppressWarnings("unchecked")
-	default <T> T resolveSafe(String variableName) throws UnknownVariable {
-		return (T) resolve(variableName);
+	default <RT> RT resolveSafe(String variableName) throws UnknownVariable {
+		return (RT) resolve(variableName);
 	}
 }

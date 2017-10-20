@@ -30,14 +30,18 @@ public final class VexpressedUtils {
 	 * {@link FunctionExecutor}. This always parses the expression so it is not
 	 * "production-ready" because it is better to cache the parse trees for the
 	 * same expression.
+	 *
+	 * @param <RT> result type
 	 */
-	public static Object eval(String expression,
-		VariableResolver variableResolver, FunctionExecutor functionExecutor)
+	@SuppressWarnings("unchecked")
+	public static <RT> RT eval(
+		String expression, VariableResolver variableResolver, FunctionExecutor functionExecutor)
 	{
 		ParseTree parseTree = createParseTree(expression);
-		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor(variableResolver)
+		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor()
+			.withVariableResolver(variableResolver)
 			.withFunctionExecutor(functionExecutor);
-		return visitor.visit(parseTree);
+		return (RT) visitor.visit(parseTree);
 	}
 
 	/**

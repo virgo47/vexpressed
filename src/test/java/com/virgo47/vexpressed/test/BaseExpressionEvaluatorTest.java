@@ -4,16 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.testng.Assert.assertEquals;
 
-import com.virgo47.vexpressed.BaseExpressionEvaluator;
-import com.virgo47.vexpressed.core.FunctionExecutionFailed;
-import com.virgo47.vexpressed.core.VariableResolver;
-import com.virgo47.vexpressed.support.VariableBinding;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import com.virgo47.vexpressed.BaseExpressionEvaluator;
+import com.virgo47.vexpressed.core.FunctionExecutionFailed;
+import com.virgo47.vexpressed.core.VariableResolver;
+import com.virgo47.vexpressed.support.VariableBinding;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -32,7 +31,7 @@ public class BaseExpressionEvaluatorTest {
 	@Test(dataProvider = "test-contains-data")
 	public void testContainsFunction(String needle, boolean expectedResult) {
 		boolean result = new BaseExpressionEvaluator()
-			.evalBoolean("contains(haystack, needle)",
+			.eval("contains(haystack, needle)",
 				new VariableBinding()
 					.add("haystack", Arrays.asList("one", "two"))
 					.add("needle", needle));

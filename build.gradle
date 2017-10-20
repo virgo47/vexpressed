@@ -36,3 +36,11 @@ generateGrammarSource {
 		"-long-messages"
 	]
 }
+
+compileJava {
+	options.compilerArgs << '-Xlint:unchecked'
+}
+
+test {
+	useTestNG()
+}
