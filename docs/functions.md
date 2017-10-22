@@ -45,17 +45,18 @@ components, accessing database, etc.
 ## Using `VariableResolver` inside the function
 
 Finally, sometimes we want to create a specific function that uses some variable value. You can
-always pass it as an argument, but what if you don't want? What if you want to use it implicitly?
+always pass it as an argument, but sometimes you may want to use a variable implicitly. E.g. the
+name of the function may imply what variable is used which allows DSL-ish approach in expressions.
 All you have to do is call the `executor` method on the `FunctionMapper` with additional
 `VariableResolver` parameter like this: `functionMapper.executor(variableResolver)`.
 Following example is rather contrive but this mechanism can be useful to make expressions in some
 situations more fluent when the function name implies the usage of the variables.
 ```
-// This time we map non-annotated function, first is name of the function (in expression)
-// then the implementing class/object (delegate), name of the method and then method
-// parameter types. VariableResolver parameter is technical and not counted.
-functionMapper = new FunctionMapper().registerFunction(
-	"isLargerThan", Scrapbook.class, "areaLargerThan", VariableResolver.class, int.class);
+// This time we map non-annotated function. VariableResolver parameter is internal and not counted.
+functionMapper = new FunctionMapper().registerFunction("isLargerThan")
+			.usingDelegate(Scrapbook.class)
+			.andItsMethod("areaLargerThan")
+			.withParameterTypes(VariableResolver.class, int.class);
 
 VariableResolver varResolver = rectangleMapper.resolverFor(new Rectangle(3, 4));
 // function is used only with one argument, the area we compare the actual area with

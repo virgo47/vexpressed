@@ -1,14 +1,5 @@
 package com.virgo47.vexpressed.support;
 
-import com.virgo47.vexpressed.core.FunctionArgument;
-import com.virgo47.vexpressed.core.FunctionExecutionFailed;
-import com.virgo47.vexpressed.core.FunctionExecutor;
-import com.virgo47.vexpressed.core.VariableResolver;
-import com.virgo47.vexpressed.meta.ExpressionType;
-import com.virgo47.vexpressed.meta.FunctionMetadata;
-import com.virgo47.vexpressed.meta.FunctionParameterDefinition;
-import com.virgo47.vexpressed.validation.FunctionTypeResolver;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -22,6 +13,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import com.virgo47.vexpressed.core.FunctionArgument;
+import com.virgo47.vexpressed.core.FunctionExecutionFailed;
+import com.virgo47.vexpressed.core.FunctionExecutor;
+import com.virgo47.vexpressed.core.VariableResolver;
+import com.virgo47.vexpressed.meta.ExpressionType;
+import com.virgo47.vexpressed.meta.FunctionMetadata;
+import com.virgo47.vexpressed.meta.FunctionParameterDefinition;
+import com.virgo47.vexpressed.validation.FunctionTypeResolver;
 
 /**
  * Configuration of supported functions which can be implemented as methods on object (non-static)
@@ -47,9 +47,10 @@ import java.util.stream.Collectors;
  * same method (explicitly, scanning does not allow this), although right now there is no
  * mechanism to know the function name used for the call.
  */
-public class FunctionMapper implements FunctionTypeResolver {
+public final class FunctionMapper implements FunctionTypeResolver {
 
 	private final Map<String, MethodInfo> methodMap = new HashMap<>();
+	private boolean finished;
 
 	/**
 	 * Finds all public methods annotated by {@link ExpressionFunction} and populates
@@ -58,6 +59,8 @@ public class FunctionMapper implements FunctionTypeResolver {
 	 * implemented by static methods.
 	 */
 	public FunctionMapper scanForFunctions(Object delegate) {
+		checkThatNotFinished();
+
 		Class delegateClass = delegate.getClass();
 		if (delegate instanceof Class) {
 			delegateClass = (Class) delegate;
@@ -113,6 +116,8 @@ public class FunctionMapper implements FunctionTypeResolver {
 	public FunctionMapper registerFunction(
 		String functionName, Object delegate, String methodName, Class<?>... parameterTypes)
 	{
+		checkThatNotFinished();
+
 		try {
 			Class<?> delegateClass = delegate.getClass();
 			if (delegate instanceof Class) {
@@ -126,6 +131,61 @@ public class FunctionMapper implements FunctionTypeResolver {
 				"Invalid method specified for function " + functionName, e);
 		}
 		return this;
+	}
+
+	/** Fluent builder version of {@link #registerFunction(String, Object, String, Class[])}. */
+	public RegisterFunctionBuilder registerFunction(String functionName) {
+		return new RegisterFunctionBuilder(functionName);
+	}
+
+	public class RegisterFunctionBuilder {
+		private String functionName;
+		private Object delegate;
+		private String methodName;
+
+		public RegisterFunctionBuilder(String functionName) {
+			this.functionName = functionName;
+		}
+
+		public RegisterFunctionBuilderWithDelegate usingDelegate(Object delegate) {
+			this.delegate = delegate;
+			return new RegisterFunctionBuilderWithDelegate();
+		}
+
+		public class RegisterFunctionBuilderWithDelegate {
+			public RegisterFunctionBuilderWithMethodName andItsMethod(String methodName) {
+				RegisterFunctionBuilder.this.methodName = methodName;
+				return new RegisterFunctionBuilderWithMethodName();
+			}
+		}
+
+		public class RegisterFunctionBuilderWithMethodName {
+			public FunctionMapper withParameterTypes(Class<?>... parameterTypes) {
+				return registerFunction(functionName, delegate, methodName, parameterTypes);
+			}
+
+			public FunctionMapper withoutParamters() {
+				return registerFunction(functionName, delegate, methodName);
+			}
+		}
+	}
+
+	/**
+	 * Finishes building of this object, any further {@link #registerFunction(String, Object,
+	 * String, Class[])} or {@link #scanForFunctions(Object)} call throws {@link
+	 * IllegalStateException}. This allows to expose this object without fear that it will
+	 * be modified.
+	 */
+	public FunctionMapper finish() {
+		finished = true;
+		return this;
+	}
+
+	private void checkThatNotFinished() {
+		if (finished) {
+			throw new IllegalStateException(
+				"Variable mapper was sealed (method 'finish' was called).");
+		}
 	}
 
 	@Override

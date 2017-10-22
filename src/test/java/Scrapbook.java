@@ -1,5 +1,7 @@
 import static com.virgo47.vexpressed.core.VariableResolver.NULL_VARIABLE_RESOLVER;
 
+import java.util.Collection;
+
 import com.virgo47.vexpressed.VexpressedUtils;
 import com.virgo47.vexpressed.core.FunctionExecutor;
 import com.virgo47.vexpressed.core.VariableResolver;
@@ -9,8 +11,6 @@ import com.virgo47.vexpressed.support.FunctionMapper;
 import com.virgo47.vexpressed.support.FunctionParam;
 import com.virgo47.vexpressed.support.VariableBinding;
 import com.virgo47.vexpressed.support.VariableMapper;
-
-import java.util.Collection;
 
 public class Scrapbook {
 
@@ -53,8 +53,10 @@ public class Scrapbook {
 		// This time we map non-annotated function, first is name of the function (in expression)
 		// then the implementing class/object (delegate), name of the method and then method
 		// parameter types. VariableResolver parameter is technical and not counted.
-		functionMapper = new FunctionMapper().registerFunction(
-			"isLargerThan", Scrapbook.class, "areaLargerThan", VariableResolver.class, int.class);
+		functionMapper = new FunctionMapper().registerFunction("isLargerThan")
+			.usingDelegate(Scrapbook.class)
+			.andItsMethod("areaLargerThan")
+			.withParameterTypes(VariableResolver.class, int.class);
 
 		varResolver = rectangleMapper.resolverFor(new Rectangle(3, 4));
 		// function is used only with one argument, the area we compare the actual area with

@@ -36,7 +36,7 @@ import com.virgo47.vexpressed.validation.VariableTypeResolver;
  *
  * @param <T> type of an source object ("evaluation context") used to resolve variables
  */
-public class VariableMapper<T> implements VariableTypeResolver {
+public final class VariableMapper<T> implements VariableTypeResolver {
 
 	private Map<String, Function<T, Object>> variableValueFunctions = new HashMap<>();
 	private Map<String, ExpressionType> variableTypes = new HashMap<>();
@@ -87,7 +87,7 @@ public class VariableMapper<T> implements VariableTypeResolver {
 	private void checkThatNotFinished() {
 		if (finished) {
 			throw new IllegalStateException(
-				"Entity variables were sealed (method finish was called).");
+				"Variable mapper was sealed (method 'finish' was called).");
 		}
 	}
 
