@@ -10,7 +10,6 @@ import com.virgo47.vexpressed.meta.ExpressionType;
 import com.virgo47.vexpressed.validation.ExpressionValidatorVisitor;
 import com.virgo47.vexpressed.validation.FunctionTypeResolver;
 import com.virgo47.vexpressed.validation.VariableTypeResolver;
-
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -19,7 +18,6 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 public final class VexpressedUtils {
 
@@ -38,10 +36,35 @@ public final class VexpressedUtils {
 		String expression, VariableResolver variableResolver, FunctionExecutor functionExecutor)
 	{
 		ParseTree parseTree = createParseTree(expression);
-		ParseTreeVisitor visitor = new ExpressionCalculatorVisitor()
+		return (RT) new ExpressionCalculatorVisitor()
 			.withVariableResolver(variableResolver)
-			.withFunctionExecutor(functionExecutor);
-		return (RT) visitor.visit(parseTree);
+			.withFunctionExecutor(functionExecutor)
+			.visit(parseTree);
+	}
+
+	/**
+	 * Evaluates the expression without any variable and function resolver.
+	 *
+	 * @param <RT> result type
+	 */
+	@SuppressWarnings("unchecked")
+	public static <RT> RT eval(String expression) {
+		ParseTree parseTree = createParseTree(expression);
+		return (RT) new ExpressionCalculatorVisitor()
+			.visit(parseTree);
+	}
+
+	/**
+	 * Evaluates the expression using provided {@link VariableResolver}.
+	 *
+	 * @param <RT> result type
+	 */
+	@SuppressWarnings("unchecked")
+	public static <RT> RT eval(String expression, VariableResolver variableResolver) {
+		ParseTree parseTree = createParseTree(expression);
+		return (RT) new ExpressionCalculatorVisitor()
+			.withVariableResolver(variableResolver)
+			.visit(parseTree);
 	}
 
 	/**
@@ -49,7 +72,7 @@ public final class VexpressedUtils {
 	 * slow operation compared to evaluation itself, so it is recommended to cache parse
 	 * trees for repeated evaluations of the same expression.
 	 */
-	public static ParseTree createParseTree(String expression) {
+	static ParseTree createParseTree(String expression) {
 		ExprLexer lexer = new ExprLexer(CharStreams.fromString(expression));
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		ExprParser parser = new ExprParser(tokens);

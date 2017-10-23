@@ -87,7 +87,7 @@ public class MathOperatorTest extends TestBase {
 		assertEquals(eval("2**2"), 4);
 		assertEquals(eval("3*2**2"), 12);
 		assertEquals(eval("2**2*3"), 12);
-		assertEquals(eval("2**2**3"), 256);
+		assertThat(eval("2**2**3")).isEqualTo(256);
 	}
 
 	@Test

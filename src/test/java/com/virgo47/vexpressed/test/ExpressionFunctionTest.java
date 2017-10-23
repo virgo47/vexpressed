@@ -48,8 +48,8 @@ public class ExpressionFunctionTest extends TestBase {
 		functionExecutor = new FunctionMapper().scanForFunctions(new TestFunctions())
 			.executor();
 		BigDecimal result = (BigDecimal) eval("rand(10)");
-		assertTrue(result.compareTo(BigDecimal.ZERO) != -1);
-		assertTrue(result.compareTo(BigDecimal.TEN) == -1);
+		assertTrue(result.compareTo(BigDecimal.ZERO) >= 0);
+		assertTrue(result.compareTo(BigDecimal.TEN) < 0);
 		assertTrue(result.compareTo((BigDecimal) eval("rand(5)")) != 0); // virtually impossible
 	}
 
@@ -168,8 +168,7 @@ public class ExpressionFunctionTest extends TestBase {
 				LocalDate.class, LocalDateTime.class, Instant.class,
 				BigDecimal.class, Integer.class, Boolean.class)
 			.executor();
-		//noinspection unchecked
-		Map<String, Object> expr = (Map<String, Object>) eval("func()");
+		Map<String, Object> expr = evalSafe("func()");
 		assertThat(expr.get("string")).isNull();
 	}
 }

@@ -1,6 +1,7 @@
 plugins {
 	id 'java'
 	id 'antlr'
+	id 'groovy'
 }
 
 group = 'com.virgo47'
@@ -16,6 +17,8 @@ ext {
 	testNgVersion = '6.10'
 	assertjVersion = '3.8.0'
 	antlrVersion = '4.7'
+	spockVersion = '1.1-groovy-2.4'
+	groovyVersion = '2.4.12'
 }
 
 sourceSets.main.antlr.srcDirs = ['src/main/antlr4']
@@ -25,6 +28,8 @@ dependencies {
 
 	testCompile "org.testng:testng:$testNgVersion"
 	testCompile "org.assertj:assertj-core:$assertjVersion"
+	testCompile "org.spockframework:spock-core:$spockVersion"
+	testCompile "org.codehaus.groovy:groovy-all:$groovyVersion"
 }
 
 generateGrammarSource {
@@ -41,6 +46,17 @@ compileJava {
 	options.compilerArgs << '-Xlint:unchecked'
 }
 
-test {
+compileTestJava {
+	options.compilerArgs << '-Xlint:unchecked'
+}
+
+// obsolete, will migrate to Spock specs
+task testng(type: Test) {
 	useTestNG()
+}
+
+test {
+	dependsOn testng
+	// for Spock
+	useJUnit()
 }

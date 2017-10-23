@@ -29,6 +29,10 @@ public class TestBase {
 		return VexpressedUtils.eval(expression, variableResolver, functionExecutor);
 	}
 
+	public <RT> RT evalSafe(String expression) {
+		return VexpressedUtils.eval(expression, variableResolver, functionExecutor);
+	}
+
 	public ExpressionType check(String expression) {
 		return VexpressedUtils.check(expression, variableTypeResolver, functionTypeResolver);
 	}
