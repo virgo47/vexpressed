@@ -14,17 +14,6 @@ import org.testng.annotations.Test;
 public class MathOperatorTest extends TestBase {
 
 	@Test
-	public void unarySign() {
-		assertEquals(eval("-(-5)"), 5);
-		// next case colides with custom operators
-		assertThatThrownBy(() -> eval("--5)"))
-			.isInstanceOf(ExpressionException.class)
-			.hasMessageMatching("(?s)Expression parse failed at 1:0.*'--'.*");
-		assertThatThrownBy(() -> eval("-'nono'"))
-			.isInstanceOf(ExpressionException.class);
-	}
-
-	@Test
 	public void arithmeticOperations() {
 		assertEquals(eval("1"), 1);
 		assertEquals(eval("5 + 1"), 6);

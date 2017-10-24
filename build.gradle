@@ -56,6 +56,8 @@ task testng(type: Test) {
 }
 
 test {
+	// when Spock test is run singly from IntelliJ IDEA it fails (not found)
+	// unless this dependsOn is commented out (temporary, untill all tests are in Spock)
 	dependsOn testng
 	// for Spock
 	useJUnit()
