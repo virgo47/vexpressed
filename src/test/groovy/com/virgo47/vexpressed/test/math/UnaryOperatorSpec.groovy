@@ -43,7 +43,7 @@ class UnaryOperatorSpec extends Specification {
 		"+ -5.1"  | -5.1
 	}
 
-	def "Unseprated double unary operator collides with custom operators and throwns exception."() {
+	def "Unseparated double unary operator collides with custom operators and throws exception."() {
 		when:
 		eval(exp)
 
