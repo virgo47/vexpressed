@@ -84,14 +84,14 @@ DIGITS: [0-9][0-9_]*;
 
 STRING_LITERAL: '\'' ( ~'\'' | '\'\'' )* '\'';
 
-SPACES: [ \u000B\t\r\n] -> channel(HIDDEN) ;
+WHITESPACE: [ \t\r\n] -> channel(HIDDEN) ;
 
-COMMENT: '/*' .*? '*/' -> skip ;
+// comments must follow whitespace
+COMMENT: WHITESPACE '/*' .*? '*/' -> skip ;
 
-LINE_COMMENT: ~'\\' '#' ~[\r\n]* -> skip ;
+LINE_COMMENT: WHITESPACE '#' ~[\r\n]* -> skip ;
 
-// after line comment and comment and similar things not to overshadow them
-CUSTOM_OP: [+*/<>=!|.;:?~_@$%^&-]+;
+CUSTOM_OP: [+*/<>=!|.;:?~_@$%^&#-]+;
 
 UNEXPECTED_CHAR: . ;
 

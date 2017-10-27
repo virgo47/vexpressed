@@ -101,16 +101,18 @@ is the top-level "expr" rule:
   string enclosed in apostrophes, any apostrophe in the string must be doubled (`~[']` means
   "anything except a single apostrophe")
 * *COMMENT:* **/&ast;** .*? **&ast;/**<br/>
-  multi-line comment (comments are ignored)
-* *LINE_COMMENT:* **//** ~[\r\n]*<br/>
-  line comment, anything after // up to the first line break is ignored
-* *CUSTOM_OP:* [#+*/<>=!|.;:?~_@$%^&-]+<br/>
+  multi-line comment (comments are ignored from evaluation, of course), beginning of the comment
+  must follow any whitespace
+* *LINE_COMMENT:* ** #** ~[\r\n]*<br/>
+  line comment, anything after # up to the first line break is ignored (must follow a whitespace)
+* *CUSTOM_OP:* [#+*/<>=!|.;:?~_@$%^&#-]+<br/>
   any combination of these symbols (except for cases introduced earlier) can be used as custom
   operation that is mapped to function names in a special manner (reserved for future use)
 
-Whitespaces (spaces, tabs, newline characters) between tokens are ignored unless necessary
-to separate what would otherwise be confusing. This also allows for multi-line expressions
-which may be more readable for complicated cases or when combined with comments.
+Whitespaces (spaces, tabs, newline characters) between tokens are ignored for evaluation purposes
+but can help separate tokens (e.g. double unary operator that would otherwise be treated as
+a custom operator). This also allows for multi-line expressions which may be more readable for
+complicated cases or when combined with comments.
 
 ## Examples
 
