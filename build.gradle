@@ -13,14 +13,6 @@ repositories {
 	jcenter()
 }
 
-ext {
-	testNgVersion = '6.10'
-	assertjVersion = '3.8.0'
-	antlrVersion = '4.7'
-	spockVersion = '1.1-groovy-2.4'
-	groovyVersion = '2.4.12'
-}
-
 sourceSets.main.antlr.srcDirs = ['src/main/antlr4']
 
 dependencies {
