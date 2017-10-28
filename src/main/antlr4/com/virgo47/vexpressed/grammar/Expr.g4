@@ -86,10 +86,9 @@ STRING_LITERAL: '\'' ( ~'\'' | '\'\'' )* '\'';
 
 WHITESPACE: [ \t\r\n] -> channel(HIDDEN) ;
 
-// comments must follow whitespace
-COMMENT: WHITESPACE '/*' .*? '*/' -> skip ;
+COMMENT: '/*' .*? '*/' -> skip ;
 
-LINE_COMMENT: WHITESPACE '#' ~[\r\n]* -> skip ;
+LINE_COMMENT: '#' ~[\r\n]* -> skip ;
 
 CUSTOM_OP: [+*/<>=!|.;:?~_@$%^&#-]+;
 

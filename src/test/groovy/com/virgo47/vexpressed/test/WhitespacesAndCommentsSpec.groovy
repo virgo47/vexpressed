@@ -22,13 +22,14 @@ class WhitespacesAndCommentsSpec extends Specification {
 		eval(" ' a b\tc\nd ' ") == " a b\tc\nd "
 	}
 
-	def "Block comment ignores everything between /* (after whitespace!) and */."() {
+	def "Block comment ignores everything between /* and */ (whitespace recommended for clarification)."() {
 		expect:
 		eval("1+2+3") == 6 // no comment
 		eval("1 /*+2*/+3") == 4
 		eval("1\t/*+2*/+3") == 4
 		eval("1\r\n/*+2*/+3") == 4
 		eval("1\r/*+2*/+3") == 4
+		eval("/*1+2+*/3") == 3 // at the start of expression
 	}
 
 	def "Block comment can be used over multiple lines."() {
@@ -42,5 +43,6 @@ class WhitespacesAndCommentsSpec extends Specification {
 		eval("1 #*2+3") == 1
 		eval("1 #*2\n+3") == 4
 		eval("1\r\n#*2\n+3") == 4
+		eval("#1+\r\n\n3") == 3 // at the start of expression
 	}
 }

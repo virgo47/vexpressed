@@ -101,10 +101,11 @@ is the top-level "expr" rule:
   string enclosed in apostrophes, any apostrophe in the string must be doubled (`~[']` means
   "anything except a single apostrophe")
 * *COMMENT:* **/&ast;** .*? **&ast;/**<br/>
-  multi-line comment (comments are ignored from evaluation, of course), beginning of the comment
-  must follow any whitespace
+  multi-line comment (comments are ignored from evaluation, of course), it is recommended to
+  use whitespace before the beginning of the comment
 * *LINE_COMMENT:* ** #** ~[\r\n]*<br/>
-  line comment, anything after # up to the first line break is ignored (must follow a whitespace)
+  line comment, anything after # up to the first line break is ignored, it is recommended to
+  use whitespace before the beginning of the comment
 * *CUSTOM_OP:* [#+*/<>=!|.;:?~_@$%^&#-]+<br/>
   any combination of these symbols (except for cases introduced earlier) can be used as custom
   operation that is mapped to function names in a special manner (reserved for future use)
