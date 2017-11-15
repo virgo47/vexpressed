@@ -1,0 +1,3 @@
+# Factory for ScriptEngine (JSR-223) support
+
+com.virgo47.vexpressed.jsr223.VexpressedScriptEngineFactory
