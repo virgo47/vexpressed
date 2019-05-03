@@ -24,13 +24,13 @@ public class ExpressionFunctionTest extends TestBase {
 	@Test(expectedExceptions = ExpressionException.class, expectedExceptionsMessageRegExp =
 		"Cannot execute function func - no function executor provided!")
 	public void functionExecutionWithoutExecutorFails() {
-		eval("func()");
+		evalAsObject("func()");
 	}
 
 	@Test
 	public void functionExecutionWithConstantFunction() {
 		functionExecutor = (fname, params) -> 1;
-		assertEquals(eval("func()"), 1);
+		assertEquals(evalAsObject("func()"), 1);
 	}
 
 	@Test
@@ -39,7 +39,7 @@ public class ExpressionFunctionTest extends TestBase {
 		testFunctions.invokedFlag = false;
 		functionExecutor = new FunctionMapper().scanForFunctions(testFunctions).executor();
 		// and it can have dot in ID
-		assertEquals(eval("n.op()"), "nop");
+		assertEquals(evalAsObject("n.op()"), "nop");
 		assertTrue(testFunctions.invokedFlag);
 	}
 
@@ -47,10 +47,10 @@ public class ExpressionFunctionTest extends TestBase {
 	public void functionCanProduceRandomNumbersAndConvertIntegerArgumentToBigDecimal() {
 		functionExecutor = new FunctionMapper().scanForFunctions(new TestFunctions())
 			.executor();
-		BigDecimal result = (BigDecimal) eval("rand(10)");
+		BigDecimal result = (BigDecimal) evalAsObject("rand(10)");
 		assertTrue(result.compareTo(BigDecimal.ZERO) >= 0);
 		assertTrue(result.compareTo(BigDecimal.TEN) < 0);
-		assertTrue(result.compareTo((BigDecimal) eval("rand(5)")) != 0); // virtually impossible
+		assertTrue(result.compareTo((BigDecimal) evalAsObject("rand(5)")) != 0); // virtually impossible
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("reverse", new TestFunctions(),
 				"nonAnnotatedMethod", String.class)
 			.executor();
-		assertEquals(eval("reverse('bomb')"), "bmob");
+		assertEquals(evalAsObject("reverse('bomb')"), "bmob");
 	}
 
 	@Test
@@ -68,12 +68,12 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("func", new TestFunctions(), "multiParamFunc",
 				String.class, String.class, Integer.class)
 			.executor();
-		assertEquals(eval("func()"), "nullnullnull");
-		assertEquals(eval("func('', 'x')"), "xnull");
-		assertEquals(eval("func(NULL, 'x', 5)"), "nullx5");
-		assertEquals(eval("func(arg2:5)"), "nullnull5");
-		assertEquals(eval("func(arg2:5, arg1:'x', 'y')"), "yx5");
-		assertEquals(eval("func('x', arg2:5, 'y')"), "xy5");
+		assertEquals(evalAsObject("func()"), "nullnullnull");
+		assertEquals(evalAsObject("func('', 'x')"), "xnull");
+		assertEquals(evalAsObject("func(NULL, 'x', 5)"), "nullx5");
+		assertEquals(evalAsObject("func(arg2:5)"), "nullnull5");
+		assertEquals(evalAsObject("func(arg2:5, arg1:'x', 'y')"), "yx5");
+		assertEquals(evalAsObject("func('x', arg2:5, 'y')"), "xy5");
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(eval("func('a','b')"), "ab");
+		assertEquals(evalAsObject("func('a','b')"), "ab");
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(eval("func(second: 'a', first: 'b')"), "ba");
+		assertEquals(evalAsObject("func(second: 'a', first: 'b')"), "ba");
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(eval("func(second: 'a')"), "XXXa");
+		assertEquals(evalAsObject("func(second: 'a')"), "XXXa");
 	}
 
 	@Test
@@ -125,8 +125,8 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(eval("func(first: 'a')"), "anull");
-		assertEquals(eval("func('a')"), "anull");
+		assertEquals(evalAsObject("func(first: 'a')"), "anull");
+		assertEquals(evalAsObject("func('a')"), "anull");
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("func", new TestFunctions(),
 				"binaryFunc", String.class, String.class)
 			.executor();
-		assertEquals(eval("'a' func 'b'"), "ab");
+		assertEquals(evalAsObject("'a' func 'b'"), "ab");
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class ExpressionFunctionTest extends TestBase {
 			.registerFunction("var_x", new TestFunctions(),
 				"var_x", VariableResolver.class)
 			.executor(variableResolver);
-		assertEquals(eval("var_x() * x"), 25);
+		assertEquals(evalAsObject("var_x() * x"), 25);
 	}
 
 	@Test
@@ -168,7 +168,7 @@ public class ExpressionFunctionTest extends TestBase {
 				LocalDate.class, LocalDateTime.class, Instant.class,
 				BigDecimal.class, Integer.class, Boolean.class)
 			.executor();
-		Map<String, Object> expr = evalSafe("func()");
+		Map<String, Object> expr = eval("func()");
 		assertThat(expr.get("string")).isNull();
 	}
 }

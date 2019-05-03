@@ -18,7 +18,7 @@ public class ListTest extends TestBase {
 
 	@Test
 	public void emptyListExpressionReturnsEmptyList() {
-		List<Object> result = evalSafe("[]");
+		List<Object> result = eval("[]");
 		assertThat(result).isNotNull()
 			.isInstanceOf(List.class);
 		assertThat(result).hasSize(0);
@@ -26,7 +26,7 @@ public class ListTest extends TestBase {
 
 	@Test
 	public void listOfOneExpressionTest() {
-		List<Object> result = evalSafe("[1]");
+		List<Object> result = eval("[1]");
 		assertThat(result).isNotNull()
 			.isInstanceOf(List.class);
 		assertThat(result).hasSize(1)
@@ -35,7 +35,7 @@ public class ListTest extends TestBase {
 
 	@Test
 	public void listOfTwoExpressionTest() {
-		List<Object> result = evalSafe("[1,2]");
+		List<Object> result = eval("[1,2]");
 		assertThat(result).isNotNull()
 			.isInstanceOf(List.class);
 		assertThat(result).hasSize(2)
@@ -44,7 +44,7 @@ public class ListTest extends TestBase {
 
 	@Test
 	public void listOfMorePreservesOrder() {
-		List<Object> result = evalSafe("[4,1,2]");
+		List<Object> result = eval("[4,1,2]");
 		assertThat(result).isNotNull()
 			.isInstanceOf(List.class);
 		assertThat(result).containsExactly(4, 1, 2);
@@ -52,7 +52,7 @@ public class ListTest extends TestBase {
 
 	@Test
 	public void listKeepsDuplicates() {
-		List<Object> result = evalSafe("[4,1,2, 1, 4]");
+		List<Object> result = eval("[4,1,2, 1, 4]");
 		assertThat(result).isNotNull()
 			.isInstanceOf(List.class);
 		assertThat(result).containsExactly(4, 1, 2, 1, 4);

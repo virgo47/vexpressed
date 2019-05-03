@@ -9,13 +9,13 @@ public class ExpressionWithCustomOperatorsTest extends TestBase {
 	@Test
 	public void functionExecutionWithoutExecutorFails() {
 		// TODO failure
-		eval("1 +*+ 2");
+		evalAsObject("1 +*+ 2");
 	}
 
 	@Test
 	public void functionExecutionWithConstantFunction() {
 		functionExecutor = (fname, params) -> 1;
 		// TODO evaluation
-		assertEquals(eval("1 +*+ 2"), 2);
+		assertEquals(evalAsObject("1 +*+ 2"), 2);
 	}
 }

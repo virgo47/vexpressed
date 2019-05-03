@@ -1,12 +1,12 @@
 package com.virgo47.vexpressed.test;
 
-import org.testng.annotations.BeforeMethod;
 import com.virgo47.vexpressed.VexpressedUtils;
 import com.virgo47.vexpressed.core.FunctionExecutor;
 import com.virgo47.vexpressed.core.VariableResolver;
 import com.virgo47.vexpressed.meta.ExpressionType;
 import com.virgo47.vexpressed.validation.FunctionTypeResolver;
 import com.virgo47.vexpressed.validation.VariableTypeResolver;
+import org.testng.annotations.BeforeMethod;
 
 public class TestBase {
 
@@ -25,11 +25,11 @@ public class TestBase {
 		functionTypeResolver = null;
 	}
 
-	public Object eval(String expression) {
+	public Object evalAsObject(String expression) {
 		return VexpressedUtils.eval(expression, variableResolver, functionExecutor);
 	}
 
-	public <RT> RT evalSafe(String expression) {
+	public <RT> RT eval(String expression) {
 		return VexpressedUtils.eval(expression, variableResolver, functionExecutor);
 	}
 
